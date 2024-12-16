@@ -1,0 +1,12 @@
+create table req_bots(
+username varchar(50),
+bot_token varchar(100),
+bot_id bigint,
+user_id bigint,
+u_w_msg_id int,
+btns varchar(1000) default null,
+bot_status int);
+
+ALTER TABLE cm_channel_data ADD COLUMN bot_id bigint FIRST;
+create table dumped_rows like cm_channel_data;
+ALTER TABLE cm_data ADD COLUMN bot_id bigint default null first;
