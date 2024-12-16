@@ -6,7 +6,6 @@ def get_keyboard():
     keyboard_builder.button(text='📂 My Channels',callback_data='My Channels')
     keyboard_builder.button(text='➕ Add Channel',callback_data='Add Channel')
     keyboard_builder.button(text='👥 Broadcast Message',callback_data='Broadcast Message')
-    keyboard_builder.button(text='⬅️ Back',callback_data='back')
     keyboard_builder.adjust(2,1)
     return keyboard_builder.as_markup()
 
@@ -58,4 +57,5 @@ def my_users_btn() :
     keyboard_builder.button(text='⬅️ Back',callback_data='cancel')
     keyboard_builder.adjust(2,1)
     return keyboard_builder.as_markup()
+
 

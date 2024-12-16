@@ -39,3 +39,8 @@ class my_users(StatesGroup):
     channels_run_send_conf = State()
     message = State()
     all_users = State()
+
+
+class set_welcome(StatesGroup):
+    get_welcome = State()
+    confirmation = State()

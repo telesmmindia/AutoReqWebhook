@@ -154,3 +154,77 @@ def udpate_message_state(user_id):
     except Exception as e:
         print(e)
         pass
+
+def udpate_welcome(bot_id,mesage_id,btns):
+    btns = str(btns)
+    query = f"update req_bots set u_w_msg_id = {mesage_id},btns = '{btns.replace("'", "''")}' where bot_id = {bot_id}"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass
+
+def unlinked_users(channel_id,user_id,channel_name):
+    query = f'INSERT INTO unlink_users VALUES ({user_id},{channel_id},"{channel_name}")'
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass
+
+def all_channels_id():
+    query = f"SELECT channel_id FROM cm_channel_data"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        x = p.fetchall()
+        connection.close()
+        return [i[j] for i in x for j in i]
+    except Exception as e:
+        print(e)
+        pass
+
+def all_channels_details(id):
+    query = f"SELECT * FROM cm_channel_data where channel_id ={id}"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return p.fetchall()
+    except Exception as e:
+        print(e)
+        pass
+
+def find_client(channel_id,user_id,admin_id):
+    query = f"SELECT * FROM cm_data where channel_id ={channel_id} and user_id={user_id} and owner_user_id = {admin_id}"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return len(p.fetchall())
+    except Exception as e:
+        print(e)
+        pass
+
+def insert_clients(bot_id,channel_id,user_id,channel_name,owner_user_id):
+    query = f'INSERT INTO cm_data VALUES ({bot_id},{channel_id},{user_id},"{channel_name}","{owner_user_id}",1)'
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass

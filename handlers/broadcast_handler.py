@@ -4,7 +4,7 @@ from threading import Thread
 from aiogram import Router, types, Bot, F
 from aiogram.fsm.context import FSMContext
 
-from keyboards.InlineKeyboard import  get_keyboard, my_users_btn, yesno, channels_new
+from keyboards.InlineKeyboard import get_keyboard, my_users_btn, yesno, channels_new, get_cancel
 from keyboards.Replykeyboard import get_n_cancel
 from core.helpers import n
 from core.states import my_users
@@ -71,7 +71,8 @@ async def schedule_handle(callback: types.CallbackQuery,state: FSMContext):
     else:
         await state.update_data(users = [i['user_id'] for i in all_clients(callback.from_user.id, callback.data, 'user_id')])
         await state.set_state(my_users.channels_run_send)
-        await callback.message.edit_text(f'You have {all_clients(callback.from_user.id, callback.data)[0]["count(*)"]} users in this channel\nEnter amount on how much users you want to Broadcast',reply_markup=get_n_cancel())
+        await callback.message.answer(f'You have {all_clients(callback.from_user.id, callback.data)[0]["count(*)"]} users in this channel\nEnter amount on how much users you want to Broadcast',reply_markup=get_n_cancel())
+        await callback.message.delete()
 
 
 @router.message( my_users.channels_run_send)
@@ -83,7 +84,7 @@ async def schedule_handle(message: types.Message,state: FSMContext):
 
     elif message.text=='Cancel':
         await state.set_state(my_users.channels)
-        await message.edit_text('Cancelled', reply_markup=my_users_btn())
+        await message.reply('Cancelled', reply_markup=my_users_btn())
     else:
         await message.answer('Enter a number only\nTry Again')
 

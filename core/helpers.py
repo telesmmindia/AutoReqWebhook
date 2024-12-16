@@ -15,7 +15,7 @@ async def is_bot_admin(channel_id,bot):
 def n(a=0,b=0,c=0,d=0,e=0,f=0):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(send_message(a,b,c,d,e))
+    loop.run_until_complete(send_message(a,b,c,d,e,f))
     loop.close()
 
 async def send_message(clients=0,forward_from=0,message_id=0,btn=0,usr_count=0,bot=None):
@@ -39,5 +39,5 @@ async def send_message(clients=0,forward_from=0,message_id=0,btn=0,usr_count=0,b
                     error_count += 1
                     pass
 
-    await bot.send_message(forward_from,f'✅📩 Message sent to {count} users\n👥💰 {count} credits deducted')
+    await bot.send_message(forward_from,f'✅📩 Message sent to {count} users')
     await bot.close()
