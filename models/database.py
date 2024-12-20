@@ -29,8 +29,7 @@ def bot_fetcher(bot_token):
     try:
         con = get_connection()
         cursor = con.cursor()
-        query = f"SELECT * FROM req_bots where bot_token = '{bot_token}'"
-        print(query)
+        query = f"SELECT * FROM req_bots where bot_token='{bot_token}'"
         cursor.execute(query)
         return cursor.fetchone()
 
@@ -66,12 +65,13 @@ def channel_data_inserter(bot_id=0, channel_id=0, user_id=0, greet_msg=0, channe
         existing_data = cursor.fetchone()
         if existing_data:
             old_bot_id, old_channel_id, old_user_id, old_greet_msg, old_channel_name, old_greet_msg_chat, old_btns = existing_data
-            insert_into_dump_table = (f"insert into dumped_rows (bot_id, channel_id, user_id, greet_msg, channel_name, greet_msg_chat, btns) values ({old_bot_id}, {old_channel_id}, {old_user_id}, {old_greet_msg}, '{old_channel_name}', {old_greet_msg_chat}, \'{old_btns.replace("'","\'")}\')")
+            insert_into_dump_table = (f"insert into dumped_rows (bot_id, channel_id, user_id, greet_msg, channel_name, greet_msg_chat, btns) values ({old_bot_id}, {old_channel_id}, {old_user_id}, {old_greet_msg}, '{old_channel_name}', {old_greet_msg_chat}, '{old_btns}'")
 
             cursor.execute(insert_into_dump_table)
             dump_query = f"delete from cm_channel_data where channel_id = {channel_id} and bot_id = 1111"
             cursor.execute(dump_query)
-        insert_query = (f"insert into cm_channel_data (bot_id, channel_id, user_id, greet_msg, channel_name, greet_msg_chat, btns) values ({bot_id}, {channel_id}, {user_id}, {greet_msg}, '{channel_name}', {greet_msg_chat}, \'{btns.replace("'", "''")}\')")
+        insert_query = (f"insert into cm_channel_data (bot_id, channel_id, user_id, greet_msg, channel_name, greet_msg_chat, btns) values ({bot_id}, {channel_id}, {user_id}, {greet_msg}, "
+                        f"'{channel_name}', {greet_msg_chat}, '{btns}')")
         cursor.execute(insert_query)
         connection.commit()
 
@@ -157,7 +157,7 @@ def udpate_message_state(user_id):
 
 def udpate_welcome(bot_id,mesage_id,btns):
     btns = str(btns)
-    query = f"update req_bots set u_w_msg_id = {mesage_id},btns = '{btns.replace("'", "''")}' where bot_id = {bot_id}"
+    query = f"update req_bots set u_w_msg_id = {mesage_id},btns = '{btns}' where bot_id = {bot_id}"
     try:
         connection = get_connection()
         p = connection.cursor()

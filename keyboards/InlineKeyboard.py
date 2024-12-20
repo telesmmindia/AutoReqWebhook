@@ -16,7 +16,7 @@ def defaultn() :
     return keyboard_builder.as_markup()
 
 def get_cancel() :
-    return InlineKeyboardBuilder().button(text='Cancel',callback_data='cancel').as_markup()
+    return InlineKeyboardBuilder().button(text='❌ Cancel',callback_data='cancel').as_markup()
 
 def yesno() :
     keyboard_builder = InlineKeyboardBuilder()
@@ -26,8 +26,8 @@ def yesno() :
 
 def edit_btns():
     keyboard_builder = InlineKeyboardBuilder()
-    keyboard_builder.button(text='Change Post', callback_data='change')
-    keyboard_builder.button(text='cancel', callback_data='cancel')
+    keyboard_builder.button(text='🔁Change Post', callback_data='change')
+    keyboard_builder.button(text='⬅️ Back', callback_data='cancel')
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
@@ -49,13 +49,12 @@ def channels_new(data):
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
-
 def my_users_btn() :
     keyboard_builder = InlineKeyboardBuilder()
-    keyboard_builder.button(text='👥 Broadcast to all Users',callback_data='all_user'),
+    keyboard_builder.button(text='👥 Broadcast To All Users',callback_data='all_user'),
     keyboard_builder.button(text='📢 Broadcast Channel Wise',callback_data='channel_wise')
     keyboard_builder.button(text='⬅️ Back',callback_data='cancel')
-    keyboard_builder.adjust(2,1)
+    keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
 
