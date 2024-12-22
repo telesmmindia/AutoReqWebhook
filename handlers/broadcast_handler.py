@@ -10,7 +10,7 @@ from core.texts import TOTAL_USERS_MESSAGE, BROADCAST_USER_COUNT, BROADCAST_MESS
     CANCELLED, NOT_ENOUGH_PEOPLE, CONFIRM_RUN_MESSAGE, SENDING_MESSAGE_TO_USERS, FORWARD_YOUR_POST
 from keyboards.InlineKeyboard import get_keyboard, my_users_btn, yesno, channels_new, get_cancel
 from keyboards.Replykeyboard import get_n_cancel
-from core.helpers import n
+from core.helpers import  send_message_broad
 from core.states import my_users
 from models.database import get_channels, all_clients
 
@@ -117,8 +117,8 @@ async def edit_message(callback: types.CallbackQuery,state: FSMContext):
         if data['users'] != 'all':
             await callback.message.answer(SENDING_MESSAGE_TO_USERS,reply_markup=ReplyKeyboardRemove())
             await callback.message.answer(CHOOSE,reply_markup=get_keyboard())
-            thread = Thread(target=n, args=(data['users'],data['forward_from'],data['message_id'],data['buttons'],data['users_count'],callback.bot))
-            thread.start()
+            task = asyncio.create_task(send_message_broad(clients=data['users'], forward_from=data['forward_from'], message_id=data['message_id'], btn=data['buttons'], usr_count=data['users_count'],bot=callback.bot))
+
         else:
             clients = all_clients(owner=callback.from_user.id, col= '*')
             clients_ids = [i['user_id'] for i in clients]
@@ -127,8 +127,9 @@ async def edit_message(callback: types.CallbackQuery,state: FSMContext):
             else:
                 await callback.message.answer(SENDING_MESSAGE_TO_USERS, reply_markup=ReplyKeyboardRemove())
                 await callback.message.answer(CHOOSE, reply_markup=get_keyboard())
-                thread = Thread(target=n,args=(clients_ids, data['forward_from'], data['message_id'], data['buttons'],data['users_count'],callback.bot))
-                thread.start()
+                task = asyncio.create_task(send_message_broad(clients=clients_ids, forward_from=data['forward_from'],
+                                                              message_id=data['message_id'], btn=data['buttons'],
+                                                              usr_count=data['users_count'],bot=callback.bot))
         await state.clear()
 
     elif callback.data == 'No':

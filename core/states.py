@@ -44,3 +44,11 @@ class my_users(StatesGroup):
 class set_welcome(StatesGroup):
     get_welcome = State()
     confirmation = State()
+
+class post_create(StatesGroup):
+    after_hour = State()
+    message = State()
+    check_message = State()
+    post_edit = State()
+    button_text = State()
+    button_link = State()

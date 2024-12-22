@@ -5,7 +5,19 @@ FRWD_POST_FRM_CHNL_ONLY = 'Please forward a message from Channel only'
 GRT_SET_2_DEF = 'Greeting Message Set to:\n`Hey {username},\nYour Request is Accepted By Channel Guru Bot 🛐! \n\nTo Know My Features Send /start or /help!`'
 FORWARD_YOUR_POST = "🔄 Forward a post from your channel"
 CHANNEL_INSERTED="Channel Data Inserted Successfully ✅📊"
+BROADCAST_SUMMARY = """📊 <b>Broadcast Summary</b>
+✅📩 Message sent to {} users
+❌ Error Count: {}
 
+<i>Send /start to see bot buttons!</i>
+"""
+
+DEFAULT_ACCEPTTED_TXT = '''Hey {},'
+Your Request to join channel {} is Accepted
+To Know My Features Send /start or /help!
+
+<i>bot created by @Channel_Guru_Bot ❤️</i>
+'''
 
 
 FWD_POST_FR_BTN = "👉 Forward the post where you want to attach buttons, or\n💬 Send any message or picture!"
@@ -115,5 +127,9 @@ BROADCAST_SUMMARY = """📊 <b>Broadcast Summary</b>
 
 <i>Send /start to see bot buttons!</i>
 """
+SHARE_POST = '''
+You can share the post anywhere using this command, make sure bot is admin in channel:
+@{} share {}
 
+Tap the buttons to share'''
 

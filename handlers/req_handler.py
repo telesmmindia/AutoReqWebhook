@@ -2,6 +2,10 @@ import traceback
 
 from aiogram import types, Router
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
+
+from core.texts import DEFAULT_ACCEPTTED_TXT
+from keyboards.InlineKeyboard import PROMO_BTN
 from models.database import unlinked_users, all_channels_id, all_channels_details, find_client, insert_clients
 
 router = Router(name="request_handler")
@@ -21,20 +25,36 @@ async def handle_join_request(message: types.message):
                 else:
                     print('User Already in database')
                 if details[0]['btns'] !=0 and details[0]['btns']  not in ['None','0']:
-                    await message.bot.copy_message(message.from_user.id,details[0]['greet_msg_chat'],details[0]['greet_msg'],
-                                           reply_markup= None if details[0]['btns']=='None' else InlineKeyboardBuilder(eval(details[0]['btns'])).as_markup()
+                    try:
+                        buttons = eval(details[0]['btns'])
+                        buttons.append(PROMO_BTN)
+                        await message.bot.copy_message(message.from_user.id,details[0]['greet_msg_chat'],details[0]['greet_msg'],
+                                           reply_markup= None if details[0]['btns']=='None' else InlineKeyboardBuilder(buttons).as_markup()
                                            )
+                    except:
+                        await message.bot.send_message(message.from_user.id,
+                                                       DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
+                                                                                    message.chat.title),
+                                                       disable_web_page_preview=True, parse_mode='html')
+
                 else:
-                    await message.bot.copy_message(message.from_user.id, details[0]['greet_msg_chat'], details[0]['greet_msg'])
+                    try:
+                        await message.bot.copy_message(message.from_user.id, details[0]['greet_msg_chat'], details[0]['greet_msg'])
+                    except:
+                        await message.bot.send_message(message.from_user.id,
+                                                       DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
+                                                                                    message.chat.title),
+                                                       disable_web_page_preview=True, parse_mode='html')
+
             elif details[0]['greet_msg']==0:
                 if find_client(message.chat.id, message.from_user.id, details[0]['user_id']) == 0:
                     insert_clients(message.bot.id,message.chat.id, message.from_user.id, details[0]['channel_name'],details[0]['user_id'])
                 else:
                     print('User Already in database')
-                await message.bot.send_message(message.from_user.id,f'Hey {message.from_user.first_name},\nYour Request is Accepted By Channel Guru Bot 🛐! \n\n<i>To Know My Features Send /start or /help!</i>',disable_web_page_preview=True,parse_mode='html')
+                await message.bot.send_message(message.from_user.id, DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,message.chat.title),disable_web_page_preview=True,parse_mode='html')
                 pass
         else:
-            await message.bot.send_message(message.from_user.id,f'Hey {message.from_user.first_name},\nYour Request is Accepted By Channel Guru Bot 🛐! \n\n<i>To Know My Features Send /start or /help!</i>',disable_web_page_preview=True,parse_mode='html')
+            await message.bot.send_message(message.from_user.id, DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,message.chat.title),disable_web_page_preview=True,parse_mode='html')
             unlinked_users(message.from_user.id, message.chat.id, message.chat.title)
             pass
 

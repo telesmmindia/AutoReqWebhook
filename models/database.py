@@ -228,3 +228,28 @@ def insert_clients(bot_id,channel_id,user_id,channel_name,owner_user_id):
     except Exception as e:
         print(e)
         pass
+
+def insert_posts(bot_id,user_id,button_id,text,file_id,button_name,buttons):
+    query = f'INSERT INTO webhook_saved_messages VALUES ({bot_id},{user_id},"{button_id}","{text}","{file_id}","{button_name}","{buttons}")'
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass
+
+def fetch_post(id):
+    query = f"SELECT * FROM webhook_saved_messages WHERE post_id='{id}'"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return p.fetchone()
+    except Exception as e:
+        print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
+        print('Fetch_bots', e)
+        pass

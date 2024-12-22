@@ -1,8 +1,11 @@
+import asyncio
 from threading import Thread
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
+
+from core.helpers import send_message_broad
 from keyboards.InlineKeyboard import get_keyboard, edit_btns, get_cancel, yesno, channels_btns, \
     channels_new  # channels_new import this later when button is fixed
 from keyboards.Replykeyboard import get_n_cancel
@@ -13,7 +16,6 @@ from core.texts import GRT_SET_2_DEF, YOUR_CHANNELS, CHOOSE, CHANNEL_DETAILS, GR
     SEND_BROADCAST_MESSAGE, ENTER_NUMBER_ONLY, CONFIRM_RUN_MESSAGE, NO_USERS_MESSAGE, SENDING_MESSAGE_TO_USERS, \
     CANCELLED, SEND_NEW_POST, GREET_MESSAGE_STORED, CONFIRM_SET_GREETING_MESSAGE, GREET_MESSAGE_UPDATED
 from models.database import get_channels, all_clients, channel_remover, editor
-from core.helpers import n
 
 router = Router(name="my_channel")
 
@@ -144,10 +146,9 @@ async def edit_message(calback: types.CallbackQuery, state: FSMContext):
         else:
             await calback.message.answer(SENDING_MESSAGE_TO_USERS, reply_markup=ReplyKeyboardRemove())
             await calback.message.answer(CHOOSE,reply_markup=get_keyboard())
-
-            thread = Thread(target=n, args=(
-            clients_ids, data['forward_from'], data['message_id'], data['buttons'], data['users_count'],calback.bot))
-            thread.start()
+            task = asyncio.create_task(send_message_broad(clients=clients_ids, forward_from=data['forward_from'],
+                                                          message_id=data['message_id'], btn=data['buttons'],
+                                                          usr_count=data['users_count'],bot=calback.bot))
         await state.clear()
 
 
