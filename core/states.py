@@ -46,9 +46,14 @@ class set_welcome(StatesGroup):
     confirmation = State()
 
 class post_create(StatesGroup):
+    what_do_you_mean = State()
+    add_button_to_post = State()
+    kaunsa_post_may_daalna_btn = State()
     after_hour = State()
     message = State()
     check_message = State()
     post_edit = State()
     button_text = State()
     button_link = State()
+    save_button = State()
+    handle_channel_send = State()

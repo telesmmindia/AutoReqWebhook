@@ -253,3 +253,42 @@ def fetch_post(id):
         print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
         print('Fetch_bots', e)
         pass
+
+def insert_buttons(user_id,button_id,button_name,buttons):
+    query = f'INSERT INTO user_buttons VALUES ({user_id},"{button_id}","{button_name}","{buttons}")'
+    print(query)
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass
+
+def fetch_buttons(user_id):
+    query = f"SELECT * FROM user_buttons WHERE user_id={user_id}"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return p.fetchall()
+    except Exception as e:
+        print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
+        print('Fetch_bots', e)
+        pass
+
+def fetch_btn(button_id):
+    query = f"SELECT * FROM user_buttons WHERE button_id='{button_id}'"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return p.fetchone()
+    except Exception as e:
+        print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
+        print('Fetch_bots', e)
+        pass

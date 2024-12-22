@@ -5,23 +5,103 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, CallbackQuery
 
-from keyboards.InlineKeyboard import  main_buttons, edit_msg, get_cancel, inline_back_button, share_save
+from keyboards.InlineKeyboard import main_buttons, edit_msg, get_cancel, inline_back_button, share_save, buttons_btn, \
+    btns_list, select_channels, share_ata_attach_btn
 from keyboards.Replykeyboard import back_button, get_n_cancel
 from core.states import post_create
 from core.texts import FWD_POST_FR_BTN, HOW_2_USE_POST_MKR, LNK_FRMT, INCRT_BTN_URL, CHOOSE, START_TEXT, \
     CANNOT_EDIT_STICKERS, YOUR_POST, CANCELLED, SEND_TEXT_FOR_BUTTON, NO_BUTTONS_ADDED, ENTER_TEXT_ONLY, BUTTON_SAVED, \
-    MAX_BUTTONS_LIMIT, SHARE_POST
-from models.database import insert_posts
+    MAX_BUTTONS_LIMIT, SHARE_POST, UR_BTN, UR_BTN_IS, SND_POST_FR_BTN_ADD, MSG_SNT_TO_CHANNEL, SELECT_CHANNELS
+from models.database import insert_posts, fetch_buttons, fetch_btn, insert_buttons, get_channels
 
 router = Router(name="post_maker")
 
 
 @router.callback_query(F.data == 'post-land')
-async def schedule_handler(callback: types.CallbackQuery, state: FSMContext):
+async def schedule_handler(callback: types.CallbackQuery,state:FSMContext):
     await callback.answer()
-    await state.set_state(post_create.check_message)
-    await callback.message.answer(FWD_POST_FR_BTN, reply_markup=back_button())
-    await callback.message.delete()
+    await state.set_state(post_create.what_do_you_mean)
+    await callback.message.edit_text(CHOOSE,reply_markup=buttons_btn())
+
+
+@router.callback_query(post_create.what_do_you_mean)
+async def soemthign(callback:types.CallbackQuery,state:FSMContext):
+    if callback.data == 'add-button':
+        await state.set_state(post_create.check_message)
+        await callback.message.edit_text(FWD_POST_FR_BTN, reply_markup=inline_back_button())
+    elif callback.data == 'my-buttons':
+        await state.set_state(post_create.add_button_to_post)
+        user_buttons = fetch_buttons(callback.from_user.id)
+        await callback.message.edit_text(UR_BTN, reply_markup=btns_list(user_buttons))
+    elif 'back' in callback.data:
+        await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
+
+
+
+@router.callback_query(post_create.add_button_to_post)
+async def add_btn_to_post(callback: CallbackQuery,state:FSMContext):
+    if callback.data =='back':
+        await state.set_state(post_create.what_do_you_mean)
+        await callback.message.edit_text(CHOOSE, reply_markup=buttons_btn())
+    else:
+        btn = fetch_btn(callback.data)
+        await state.update_data(btns_to_attach = eval(btn['buttons']))
+        await state.set_state(post_create.kaunsa_post_may_daalna_btn)
+        await callback.message.edit_text(UR_BTN_IS,reply_markup=InlineKeyboardMarkup(inline_keyboard=eval(btn['buttons'])))
+        await callback.message.answer(SND_POST_FR_BTN_ADD,reply_markup=get_n_cancel())
+
+
+@router.message(post_create.kaunsa_post_may_daalna_btn)
+async def attach_btn(message:types.Message,state:FSMContext):
+    if message.text == '❌ Cancel':
+        await state.set_state(post_create.add_button_to_post)
+        user_buttons = fetch_buttons(message.from_user.id)
+        await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(UR_BTN, reply_markup=btns_list(user_buttons))
+    else:
+        data = await state.get_data()
+        file_id = None
+        caption = None
+        text = None
+        if message.sticker:
+            await message.answer(CANNOT_EDIT_STICKERS)
+        else:
+            for media_type in ['photo', 'video', 'audio', 'animation', 'document', 'voice']:
+                media = getattr(message, media_type, None)
+                if media:
+                    if media_type == 'photo':
+                        file_id = media[0].file_id
+                        break
+                    elif media_type == 'animation':
+                        file_id = media.file_id
+                        break
+                    else:
+                        file_id = media['file_id']
+                        break
+        if file_id is None:
+            text = message.text
+        else:
+            caption = message.caption
+
+        media_handlers = {
+            'photo': message.answer_photo,
+            'video': message.answer_video,
+            'audio': message.answer_audio,
+            'animation': message.answer_animation,
+        }
+        if file_id:
+            for media_type, handler in media_handlers.items():
+                if getattr(message, media_type, None):
+                    x = await handler(file_id, caption=caption,
+                                      reply_markup=InlineKeyboardMarkup(inline_keyboard=data['btns_to_attach']))
+                    break
+        else:
+            x = await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=data['btns_to_attach']))
+
+        await state.update_data(to_reply=x)
+        await x.reply(SHARE_POST.format(data['btn_id']), reply_markup=share_ata_attach_btn(f'share {data["btn_id"]}'))
+        await state.update_data(button_id=data['btn_id'], buttons=str(data['btns_to_attach']), to_copy_if=x.message_id)
+        await state.set_state(post_create.after_hour)
 
 
 @router.message(post_create.check_message)
@@ -122,10 +202,8 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
         await to_reply.reply(SHARE_POST.format(bot_ka_details.username,unique_button_id), reply_markup=share_save(f'share {unique_button_id}'))
         insert_posts(bot_ka_details.id,callback.from_user.id, unique_button_id, data['text'], data['file_id'], unique_button_id,
                      str(keyboard).replace('\"', '\''))
-
-        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
-        await callback.message.delete()
-
+        await state.update_data(button_id =unique_button_id,buttons = str(keyboard))
+        await state.set_state(post_create.after_hour)
 
 @router.message(post_create.button_text)
 async def button_adder(message: types.Message, state: FSMContext):
@@ -181,10 +259,91 @@ async def button_adder(message: types.Message, state: FSMContext):
                                     data['add_to_column'])
                 await state.update_data(keyboard=keyboard)
                 await state.update_data(url_post=[])
-                print('after everything', keyboard)
                 await message.answer(data['text'], reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
         else:
             await message.answer(MAX_BUTTONS_LIMIT)
     else:
         await message.answer(INCRT_BTN_URL)
 
+@router.callback_query(post_create.after_hour)
+async def save_bttn(callback:types.CallbackQuery,state:FSMContext):
+    if callback.data=='save':
+        await callback.message.answer('Enter a name for button set')
+        await state.set_state(post_create.save_button)
+    elif callback.data == 'channel':
+        await state.set_state(post_create.handle_channel_send)
+        channels = get_channels(callback.from_user.id)
+        to_send = []
+        for channel in channels:
+            to_send.append({channel['channel_name'] : f'{channel["channel_id"]}/0'})
+        await state.update_data(to_send = to_send)
+        await callback.message.answer(SELECT_CHANNELS,reply_markup=select_channels(to_send))
+
+    elif callback.data == 'main':
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await state.clear()
+
+@router.callback_query(post_create.handle_channel_send)
+async def handle_channel_sng(callback:CallbackQuery,state:FSMContext):
+    await callback.answer()
+    if callback.data == 'done':
+        data = await state.get_data()
+        to_send = data['to_send']
+        for dictionary in to_send:
+            for key, value in dictionary.items():
+                channel_id,state = value.split('/')
+                if state == '1':
+                    try:
+                        await callback.bot.copy_message(
+                            chat_id=int(channel_id),
+                            from_chat_id=callback.from_user.id
+                            ,message_id=int(data['to_copy_if']),
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard=eval(data['buttons'])))
+                    except Exception as e:
+                        await callback.message.answer(f'Cannot Send to {key}\nERROR : {e}')
+
+        await callback.message.edit_text(MSG_SNT_TO_CHANNEL)
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await state.clear()
+
+    elif callback.data == 'all':
+        data = await state.get_data()
+        to_send = data['to_send']
+        for dictionary in to_send:
+            for key, value in dictionary.items():
+                channel_id, state = value.split('/')
+                try:
+                    await callback.bot.copy_message(
+                        chat_id=int(channel_id),
+                        from_chat_id=callback.from_user.id
+                        , message_id=int(data['to_copy_if']),
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard=eval(data['buttons'])))
+                except Exception as e:
+                    await callback.message.answer(f'Cannot Send to {key}\nERROR : {e}')
+
+        await callback.message.edit_text(MSG_SNT_TO_CHANNEL)
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await state.clear()
+
+    elif callback.data == 'cancel':
+        await callback.message.answer(CANCELLED, reply_markup=main_buttons())
+        await state.clear()
+    else:
+        data = await state.get_data()
+        to_send = data['to_send']
+        channel_id,current_state = callback.data.split('/')
+        for dictionary in to_send:
+            for key, value in dictionary.items():
+                if channel_id in value:
+                    dictionary[key] = f"{channel_id}/{'0' if current_state =='1' else '1'}"
+                    break
+        await callback.message.edit_text(SELECT_CHANNELS,reply_markup=select_channels(to_send))
+
+
+@router.message(post_create.save_button)
+async def saving_Btn(message:types.Message,state:FSMContext):
+    data = await state.get_data()
+    insert_buttons(message.from_user.id,data['button_id'],message.text,data['buttons'])
+    await message.answer("Buttons inserted")
+    await message.answer(CHOOSE, reply_markup=main_buttons())
+    await state.clear()

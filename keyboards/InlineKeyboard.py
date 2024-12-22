@@ -111,4 +111,51 @@ def inline_back_button():
     return keyboard_builder.as_markup()
 
 def share_save(query) :
-    return InlineKeyboardBuilder().button(text='Share via inline',switch_inline_query=query).as_markup()
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='Share via inline',switch_inline_query=query)
+    keyboard.button(text='Save this button set',callback_data='save')
+    keyboard.button(text='Main menu',callback_data='main')
+    keyboard.adjust(1)
+    return keyboard.as_markup()
+
+def select_channels(channels):
+    keyboard = InlineKeyboardBuilder()
+    for channel in channels:
+        for key,value in channel.items():
+            channel_id,state = value.split('/')
+            keyboard.button(text=key,callback_data=value)
+            keyboard.button(text='✅' if state=='1' else '❌' ,callback_data=f'{channel_id}/{state}')
+
+    keyboard.button(text='Done',callback_data='done')
+    keyboard.button(text='Send to all channels',callback_data='all')
+    keyboard.button(text='Cancel', callback_data='cancel')
+    rows_with_two_columns = len(channels)
+    layout = [2] * rows_with_two_columns
+    layout.extend([1])
+    keyboard.adjust(*layout)
+    return keyboard.as_markup()
+
+
+def buttons_btn():
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.button(text='➕ Create Post with buttons', callback_data='add-button')
+    keyboard_builder.button(text='My Buttons', callback_data='my-buttons')
+    keyboard_builder.button(text='⬅️ Back',callback_data='back-2-soamfsdfhsfa')
+    keyboard_builder.adjust(1)
+    return keyboard_builder.as_markup()
+
+def btns_list(buttons):
+    keyboard_builder = InlineKeyboardBuilder()
+    for button in buttons:
+        keyboard_builder.button(text=f'{button['button_name']}', callback_data=f'{button['button_id']}')
+    keyboard_builder.button(text='⬅️ Back',callback_data='back')
+    keyboard_builder.adjust(1)
+    return keyboard_builder.as_markup()
+
+def share_ata_attach_btn(query):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='Share via inline', switch_inline_query=query)
+    keyboard.button(text='Share post to channel', callback_data='channel')
+    keyboard.button(text='Main menu', callback_data='main')
+    keyboard.adjust(1)
+    return keyboard.as_markup()

@@ -133,3 +133,8 @@ You can share the post anywhere using this command, make sure bot is admin in ch
 
 Tap the buttons to share'''
 
+UR_BTN = "Your buttons are"
+UR_BTN_IS = 'Your button is'
+SND_POST_FR_BTN_ADD = 'Send a post to attach this buttons'
+SELECT_CHANNELS = "Select channels to send message"
+MSG_SNT_TO_CHANNEL = "Message sent to selected channel"
