@@ -1,5 +1,4 @@
 CHOOSE = "🔘 Choose:"
-WHT_IS_GRT_MSG = '''Send a Greeting Message for your Users or use default Greeting Message👋🏼😊\n`Warning: Do not delete the custom message from chat`'''
 BOT_NOT_ADMIN = 'The Bot is not an Admin in your Channel ☹ Named\n{}\nMake Sure the Bot is Admin and Resend the Post Here!'
 FRWD_POST_FRM_CHNL_ONLY = 'Please forward a message from Channel only'
 GRT_SET_2_DEF = 'Greeting Message Set to:\n`Hey {username},\nYour Request is Accepted By Channel Guru Bot 🛐! \n\nTo Know My Features Send /start or /help!`'
@@ -114,13 +113,15 @@ GREET_MESSAGE_UPDATED = "🎉 Greet message updated successfully ✅📊"
 ENTER_BOT_TOKEN = "🔑 Enter Your Bot Token:"
 YOUR_BOTS = "🤖 Your bots are"
 CANNOT_EDIT_STICKERS = "❌ Cannot edit stickers\n🔄 Try something else"
-YOUR_POST = "📄 Your post is"
+YOUR_POST = "Click on the + button to add buttons! \n📄 Your post is"
 SEND_TEXT_FOR_BUTTON = "🔤 Send text for button"
 NO_BUTTONS_ADDED = "❌ No buttons added"
 ENTER_TEXT_ONLY = "🔤 Enter text only"
 BUTTON_SAVED = "✅ Button saved"
 MAX_BUTTONS_LIMIT = "🛑🤚 You can only add 5 buttons"
 CHANNEL_USER_COUNT = "👥 You have {} users in this channel"
+ENTER_A_NAME_FOR_BUTTON_SET='Enter a name for button set'
+BUTTON_INSERTED="Button Inserted"
 BROADCAST_SUMMARY = """📊 <b>Broadcast Summary</b>
 ✅📩 Message sent to {} users
 ❌ Error Count: {}
@@ -138,3 +139,4 @@ UR_BTN_IS = 'Your button is'
 SND_POST_FR_BTN_ADD = 'Send a post to attach this buttons'
 SELECT_CHANNELS = "Select channels to send message"
 MSG_SNT_TO_CHANNEL = "Message sent to selected channel"
+MSG_SNT_TO_CHANNEL_ALL = "Message sent to all channel"

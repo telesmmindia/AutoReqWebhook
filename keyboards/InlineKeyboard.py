@@ -23,6 +23,7 @@ def defaultn() :
     keyboard_builder = InlineKeyboardBuilder()
     keyboard_builder.button(text='Default: Hi {username}\nWelcome to {channel_name}.Your Request has been accepted by {}',callback_data='default')
     keyboard_builder.button(text='Enter Custom Greeting Message',callback_data='custom')
+    keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
 def get_cancel() :
@@ -110,13 +111,7 @@ def inline_back_button():
     keyboard_builder.button(text='⬅️ Back',callback_data='back')
     return keyboard_builder.as_markup()
 
-def share_save(query) :
-    keyboard = InlineKeyboardBuilder()
-    keyboard.button(text='Share via inline',switch_inline_query=query)
-    keyboard.button(text='Save this button set',callback_data='save')
-    keyboard.button(text='Main menu',callback_data='main')
-    keyboard.adjust(1)
-    return keyboard.as_markup()
+
 
 def select_channels(channels):
     keyboard = InlineKeyboardBuilder()
@@ -147,7 +142,7 @@ def buttons_btn():
 def btns_list(buttons):
     keyboard_builder = InlineKeyboardBuilder()
     for button in buttons:
-        keyboard_builder.button(text=f'{button['button_name']}', callback_data=f'{button['button_id']}')
+        keyboard_builder.button(text=f'{button["button_name"]}', callback_data=f'{button["button_id"]}')
     keyboard_builder.button(text='⬅️ Back',callback_data='back')
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
@@ -157,5 +152,14 @@ def share_ata_attach_btn(query):
     keyboard.button(text='Share via inline', switch_inline_query=query)
     keyboard.button(text='Share post to channel', callback_data='channel')
     keyboard.button(text='Main menu', callback_data='main')
+    keyboard.adjust(1)
+    return keyboard.as_markup()
+
+def share_save(query) :
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='Share via inline',switch_inline_query=query)
+    keyboard.button(text='Share post to channel',callback_data='channel')
+    keyboard.button(text='Save this button set',callback_data='save')
+    keyboard.button(text='Main menu',callback_data='main')
     keyboard.adjust(1)
     return keyboard.as_markup()

@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, GREETING_MESSAGE_CHANNEL, SEND_NEW_WELCOME_MSG, CONFIRM_WELCOME_MSG, \
-    UPDATED_WELCOME_TEXT
+    UPDATED_WELCOME_TEXT, GRT_SET_2_DEF
 from keyboards.InlineKeyboard import get_keyboard, yesno, PROMO_BTN, main_buttons
 from keyboards.Replykeyboard import get_n_cancel
 from models.database import bot_fetcher, udpate_welcome
@@ -52,9 +52,15 @@ async def back_to_ad(callback:CallbackQuery,state:FSMContext):
 async def start_user_handler(message:Message):
     details = bot_fetcher(message.bot.token)
     buttons = eval(details['btns'])
-    buttons.append(PROMO_BTN)
-    await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
+    try:
+        buttons.append(PROMO_BTN)
+    except:
+        buttons=InlineKeyboardMarkup(inline_keyboard=[PROMO_BTN])
+    try:
+        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
                                    reply_markup=None if details['btns'] == 'None' else InlineKeyboardBuilder(buttons).as_markup())
+    except:
+        await message.answer(GRT_SET_2_DEF,reply_markup=buttons)
 
 
 @router.message(SetWelcomeFilter())
