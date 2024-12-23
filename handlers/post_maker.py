@@ -6,6 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton,CallbackQuery, ReplyKeyboardRemove
 from colorama import Fore,Style
 import traceback
+
+
 from keyboards.InlineKeyboard import main_buttons, edit_msg, get_cancel, inline_back_button, share_save, buttons_btn, \
     btns_list, select_channels, share_ata_attach_btn
 from keyboards.Replykeyboard import back_button, get_n_cancel
@@ -15,16 +17,23 @@ from core.texts import FWD_POST_FR_BTN, HOW_2_USE_POST_MKR, LNK_FRMT, INCRT_BTN_
     MAX_BUTTONS_LIMIT, SHARE_POST, UR_BTN, UR_BTN_IS, SND_POST_FR_BTN_ADD, MSG_SNT_TO_CHANNEL, SELECT_CHANNELS, \
     ENTER_A_NAME_FOR_BUTTON_SET, BUTTON_INSERTED, MSG_SNT_TO_CHANNEL_ALL
 from models.database import insert_posts, fetch_buttons, fetch_btn, insert_buttons, get_channels
+from aiogram import Dispatcher, Bot
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 router = Router(name="post_maker")
 
 
 @router.callback_query(F.data == 'post-land')
 async def schedule_handler(callback: types.CallbackQuery,state:FSMContext):
-    await callback.answer()
-    await state.set_state(post_create.what_do_you_mean)
-    await callback.message.edit_text(CHOOSE,reply_markup=buttons_btn())
-
+    inline_mode=(await callback.bot.get_me()).supports_inline_queries
+    if inline_mode:
+        await callback.answer()
+        await state.set_state(post_create.what_do_you_mean)
+        await callback.message.edit_text(CHOOSE,reply_markup=buttons_btn())
+    else:
+        await callback.message.edit_text("Please Enable Inline Mode!")
+        await callback.message.answer(CHOOSE,reply_markup=main_buttons())
 
 @router.callback_query(post_create.what_do_you_mean)
 async def soemthign(callback:types.CallbackQuery,state:FSMContext):

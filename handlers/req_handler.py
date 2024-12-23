@@ -2,7 +2,7 @@ import traceback
 
 from aiogram import types, Router
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from core.texts import DEFAULT_ACCEPTTED_TXT
 from keyboards.InlineKeyboard import PROMO_BTN
@@ -35,7 +35,7 @@ async def handle_join_request(message: types.message):
                         await message.bot.send_message(message.from_user.id,
                                                        DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
                                                                                     message.chat.title),
-                                                       disable_web_page_preview=True, parse_mode='html')
+                                                       disable_web_page_preview=True, parse_mode='html',reply_markup=InlineKeyboardMarkup(inline_keyboard=PROMO_BTN))
 
                 else:
                     try:
@@ -44,7 +44,7 @@ async def handle_join_request(message: types.message):
                         await message.bot.send_message(message.from_user.id,
                                                        DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
                                                                                     message.chat.title),
-                                                       disable_web_page_preview=True, parse_mode='html')
+                                                       disable_web_page_preview=True, parse_mode='html',reply_markup=InlineKeyboardMarkup(inline_keyboard=PROMO_BTN))
 
             elif details[0]['greet_msg']==0:
                 if find_client(message.chat.id, message.from_user.id, details[0]['user_id']) == 0:
@@ -57,7 +57,6 @@ async def handle_join_request(message: types.message):
             await message.bot.send_message(message.from_user.id, DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,message.chat.title),disable_web_page_preview=True,parse_mode='html')
             unlinked_users(message.from_user.id, message.chat.id, message.chat.title)
             pass
-
     except Exception as e:
         print(traceback.format_exc())
         print('Channel not in database')
