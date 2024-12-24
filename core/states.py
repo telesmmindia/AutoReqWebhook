@@ -42,8 +42,10 @@ class my_users(StatesGroup):
 
 
 class set_welcome(StatesGroup):
+    change_post=State()
     get_welcome = State()
     confirmation = State()
+
 
 class post_create(StatesGroup):
     what_do_you_mean = State()

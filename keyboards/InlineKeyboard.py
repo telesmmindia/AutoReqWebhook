@@ -5,7 +5,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 def main_buttons():
     keyboard_builder = InlineKeyboardBuilder()
     keyboard_builder.button(text='🤝 Request Accept Features',callback_data='request')
-    keyboard_builder.button(text='Add Buttons To Your Posts 🔼',callback_data='post-land')
+    keyboard_builder.button(text='🔼 Add Buttons To Your Posts',callback_data='post-land')
+    keyboard_builder.button(text="🎉 Bot's Welcome Message!", callback_data='welcome')
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
@@ -22,7 +23,8 @@ def get_keyboard():
 def defaultn() :
     keyboard_builder = InlineKeyboardBuilder()
     keyboard_builder.button(text='Default: Hi {username}\nWelcome to {channel_name}.Your Request has been accepted by {}',callback_data='default')
-    keyboard_builder.button(text='Enter Custom Greeting Message',callback_data='custom')
+    keyboard_builder.button(text='Enter Custom Greeting Message 🎉',callback_data='custom')
+    keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
 def get_cancel() :
@@ -77,7 +79,7 @@ def edit_msg(data='',buttons=0,add_to_row=0,add_to_column=0,is_it_the_very_first
             row.append(InlineKeyboardButton(text='➕',callback_data=f'{index}-{len(row)}'))
 
         buttons.append([InlineKeyboardButton(text='➕',callback_data=f'{len(buttons)}-0')])
-        buttons.append([InlineKeyboardButton(text='Get Post', callback_data='post')])
+        buttons.append([InlineKeyboardButton(text='Get Post 📄', callback_data='post')])
     else:
         if len(buttons)==0:
             buttons = []
@@ -95,14 +97,14 @@ def edit_msg(data='',buttons=0,add_to_row=0,add_to_column=0,is_it_the_very_first
 
             if len(buttons)<=1:
                 buttons.append([InlineKeyboardButton(text='➕',callback_data=f'{len(buttons)}-0')])
-                buttons.append([InlineKeyboardButton(text='Get Post',callback_data='post')])
+                buttons.append([InlineKeyboardButton(text='Get Post 📄',callback_data='post')])
             else:
                 if buttons[-2][0].text != "➕":
                     buttons.insert(-1,[InlineKeyboardButton(text='➕',callback_data=f'{len(buttons)-1}-0')])
                 if not any(
-                button[0].text == "Get Post" and button[0].callback_data == 'post'
+                button[0].text == "Get Post 📄" and button[0].callback_data == 'post'
                 for button in buttons):
-                    buttons.append([InlineKeyboardButton(text='Get Post',callback_data=f'post')])
+                    buttons.append([InlineKeyboardButton(text='Get Post 📄',callback_data=f'post')])
     return buttons
 
 def inline_back_button():
@@ -110,13 +112,7 @@ def inline_back_button():
     keyboard_builder.button(text='⬅️ Back',callback_data='back')
     return keyboard_builder.as_markup()
 
-def share_save(query) :
-    keyboard = InlineKeyboardBuilder()
-    keyboard.button(text='Share via inline',switch_inline_query=query)
-    keyboard.button(text='Save this button set',callback_data='save')
-    keyboard.button(text='Main menu',callback_data='main')
-    keyboard.adjust(1)
-    return keyboard.as_markup()
+
 
 def select_channels(channels):
     keyboard = InlineKeyboardBuilder()
@@ -126,9 +122,9 @@ def select_channels(channels):
             keyboard.button(text=key,callback_data=value)
             keyboard.button(text='✅' if state=='1' else '❌' ,callback_data=f'{channel_id}/{state}')
 
-    keyboard.button(text='Done',callback_data='done')
-    keyboard.button(text='Send to all channels',callback_data='all')
-    keyboard.button(text='Cancel', callback_data='cancel')
+    keyboard.button(text='✅ Done', callback_data='done')
+    keyboard.button(text='📤 Send to all channels', callback_data='all')
+    keyboard.button(text='❌ Cancel', callback_data='cancel')
     rows_with_two_columns = len(channels)
     layout = [2] * rows_with_two_columns
     layout.extend([1])
@@ -139,7 +135,7 @@ def select_channels(channels):
 def buttons_btn():
     keyboard_builder = InlineKeyboardBuilder()
     keyboard_builder.button(text='➕ Create Post with buttons', callback_data='add-button')
-    keyboard_builder.button(text='My Buttons', callback_data='my-buttons')
+    keyboard_builder.button(text='📥 My Saved Buttons', callback_data='my-buttons')
     keyboard_builder.button(text='⬅️ Back',callback_data='back-2-soamfsdfhsfa')
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
@@ -147,15 +143,25 @@ def buttons_btn():
 def btns_list(buttons):
     keyboard_builder = InlineKeyboardBuilder()
     for button in buttons:
-        keyboard_builder.button(text=f'{button['button_name']}', callback_data=f'{button['button_id']}')
+        keyboard_builder.button(text=f'{button["button_name"]}', callback_data=f'{button["button_id"]}')
     keyboard_builder.button(text='⬅️ Back',callback_data='back')
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
+def share_save(query):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='🔗 Share via inline', switch_inline_query=query)
+    keyboard.button(text='📢 Share post to channel', callback_data='channel')
+    keyboard.button(text='💾 Save this button set', callback_data='save')
+    keyboard.button(text='🏠 Main menu', callback_data='main')
+    keyboard.adjust(1)
+    return keyboard.as_markup()
+
+
 def share_ata_attach_btn(query):
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text='Share via inline', switch_inline_query=query)
-    keyboard.button(text='Share post to channel', callback_data='channel')
-    keyboard.button(text='Main menu', callback_data='main')
+    keyboard.button(text='🔗 Share via inline', switch_inline_query=query)
+    keyboard.button(text='📢 Share post to channel', callback_data='channel')
+    keyboard.button(text='🏠 Main menu', callback_data='main')
     keyboard.adjust(1)
     return keyboard.as_markup()

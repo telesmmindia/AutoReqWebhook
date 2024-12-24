@@ -1,13 +1,14 @@
 from aiogram import Router, F
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from core.states import set_welcome
-from core.texts import CHOOSE, CANCELLED, GREETING_MESSAGE_CHANNEL, SEND_NEW_WELCOME_MSG, CONFIRM_WELCOME_MSG, \
-    UPDATED_WELCOME_TEXT
-from keyboards.InlineKeyboard import get_keyboard, yesno, PROMO_BTN, main_buttons
+from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
+     GRT_SET_2_DEF, EDIT_OPTIONS, DEFAULT_ACCEPTTED_TXT, CONFIRM_SET_GREETING_MESSAGE, \
+    GREET_MESSAGE_UPDATED
+from keyboards.InlineKeyboard import get_keyboard, yesno, PROMO_BTN, main_buttons, edit_btns
 from keyboards.Replykeyboard import get_n_cancel
 from models.database import bot_fetcher, udpate_welcome
 
@@ -52,28 +53,43 @@ async def back_to_ad(callback:CallbackQuery,state:FSMContext):
 async def start_user_handler(message:Message):
     details = bot_fetcher(message.bot.token)
     buttons = eval(details['btns'])
-    buttons.append(PROMO_BTN)
-    await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
+    try:
+        buttons.append(PROMO_BTN)
+    except:
+        buttons=InlineKeyboardMarkup(inline_keyboard=[PROMO_BTN])
+    try:
+        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
                                    reply_markup=None if details['btns'] == 'None' else InlineKeyboardBuilder(buttons).as_markup())
+    except:
+        await message.answer(GRT_SET_2_DEF,reply_markup=buttons)
 
 
-@router.message(SetWelcomeFilter())
+@router.callback_query(F.data=="welcome")
 async def set_welcome_of_bot(message:Message,state:FSMContext):
     details = bot_fetcher(message.bot.token)
-    await state.set_state(set_welcome.get_welcome)
+    await state.set_state(set_welcome.change_post)
     try:
-        await message.answer(GREETING_MESSAGE_CHANNEL)
         message_to_cum_on = await message.bot.copy_message(message.from_user.id,details['user_id'],details['u_w_msg_id'],
                                                        reply_markup = None if details['btns'] == 'None' else InlineKeyboardBuilder(eval(details['btns'])).as_markup())
-        await message.bot.send_message(chat_id=message.from_user.id,text=SEND_NEW_WELCOME_MSG,reply_to_message_id=message_to_cum_on.message_id,reply_markup=get_n_cancel())
+        await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
     except:
-        await message.bot.send_message(chat_id=message.from_user.id,text=SEND_NEW_WELCOME_MSG,reply_markup=get_n_cancel())
+        await message.bot.send_message(chat_id=message.from_user.id,text=DEFAULT_ACCEPTTED_TXT,reply_markup=get_n_cancel())
+        await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
 
+@router.callback_query(set_welcome.change_post)
+async def change_post_fuinc(callback:CallbackQuery,state:FSMContext):
+    if callback.data=='cancel':
+        await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
+        await state.clear()
+    else:
+        await callback.message.delete()
+        await callback.message.answer(SEND_NEW_WELCOME_MSG,reply_markup=get_n_cancel())
+        await state.set_state(set_welcome.get_welcome)
 
 @router.message(set_welcome.get_welcome)
 async def get_welcome_msg(message: Message,state:FSMContext):
     if message.text:
-        if message.text.lower() != 'cancel':
+        if 'cancel' not in message.text.lower() :
             await state.set_state(set_welcome.confirmation)
             await state.update_data(message_id = message.message_id)
             if message.reply_markup:
@@ -81,9 +97,10 @@ async def get_welcome_msg(message: Message,state:FSMContext):
             else:
                 await state.update_data(buttons = None)
             testis = await message.send_copy(chat_id=message.from_user.id,reply_markup=message.reply_markup)
-            await testis.reply(CONFIRM_WELCOME_MSG,reply_markup=yesno())
+            await testis.reply(CONFIRM_SET_GREETING_MESSAGE,reply_markup=yesno())
         else:
-            await message.answer(CANCELLED,reply_markup=get_keyboard())
+            await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
+            await message.answer(CHOOSE,reply_markup=main_buttons())
             await state.clear()
     else:
         await state.set_state(set_welcome.confirmation)
@@ -93,16 +110,18 @@ async def get_welcome_msg(message: Message,state:FSMContext):
         else:
             await state.update_data(buttons=None)
         testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup)
-        await testis.reply(CONFIRM_WELCOME_MSG, reply_markup=yesno())
+        await testis.reply(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
 
 @router.callback_query(set_welcome.confirmation)
 async def confirm_welcome(callback:CallbackQuery,state:FSMContext):
     if callback.data == 'Yes':
         data = await state.get_data()
         udpate_welcome(callback.bot.id,data['message_id'],str(data['buttons']).replace('\'','"'))
-        await callback.message.edit_text(UPDATED_WELCOME_TEXT,reply_makup=get_keyboard())
+        await callback.message.delete()
+        await callback.message.answer(GREET_MESSAGE_UPDATED,reply_markup=ReplyKeyboardRemove())
+        await callback.message.answer(CHOOSE,reply_markup=main_buttons())
     else:
-        await callback.message.edit_text(CANCELLED, reply_markup=get_keyboard())
+        await callback.message.edit_text(CANCELLED, reply_markup=main_buttons())
     await state.clear()
 
 

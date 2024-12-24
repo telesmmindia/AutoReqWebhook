@@ -47,11 +47,14 @@ async def channel_edit(callback: types.CallbackQuery, state: FSMContext):
         await state.set_state(MyChannels.btn_edit)
         if data['editing_channel'][0]['greet_msg'] != 0:
             print((data['editing_channel'][0]['btns']).replace('\"', '\''))
-            await callback.bot.copy_message(callback.from_user.id, data['editing_channel'][0]['greet_msg_chat'],
+            try:
+                await callback.bot.copy_message(callback.from_user.id, data['editing_channel'][0]['greet_msg_chat'],
                                    data['editing_channel'][0]['greet_msg'],
                                    reply_markup=None if data['editing_channel'][0][
                                                             'btns'] == 'None' else InlineKeyboardBuilder(
                                        eval(data['editing_channel'][0]['btns'])).as_markup())
+            except Exception as e:
+                await callback.message.answer(GRT_SET_2_DEF)
         else:
             await callback.message.answer(GRT_SET_2_DEF)
 
@@ -146,6 +149,7 @@ async def edit_message(calback: types.CallbackQuery, state: FSMContext):
         else:
             await calback.message.answer(SENDING_MESSAGE_TO_USERS, reply_markup=ReplyKeyboardRemove())
             await calback.message.answer(CHOOSE,reply_markup=get_keyboard())
+            await state.clear()
             task = asyncio.create_task(send_message_broad(clients=clients_ids, forward_from=data['forward_from'],
                                                           message_id=data['message_id'], btn=data['buttons'],
                                                           usr_count=data['users_count'],bot=calback.bot))
@@ -161,7 +165,8 @@ async def edit_message(calback: types.CallbackQuery, state: FSMContext):
 async def edit_message(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == 'change':
         await state.set_state(MyChannels.greet_msg_edit)
-        await callback.message.edit_text(SEND_NEW_POST)
+        await callback.message.delete()
+        await callback.message.answer(SEND_NEW_POST,reply_markup=get_n_cancel())
 
     elif callback.data == 'cancel':
         await state.set_state(MyChannels.edit)
@@ -176,17 +181,24 @@ async def edit_message(callback: types.CallbackQuery, state: FSMContext):
 
 @router.message(MyChannels.greet_msg_edit)
 async def edit_message(message: types.Message, state: FSMContext):
-    await state.set_state(MyChannels.greet_btn_edit)
-    await message.answer(GREET_MESSAGE_STORED)
-    if message.reply_markup:
-        await state.update_data(buttons=message.reply_markup.inline_keyboard)
+    if "cancel" in message.text.lower():
+        await state.set_state(MyChannels.edit)
+        details = get_channels(message.from_user.id)
+        await state.update_data(editing_channel=details)
+        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
+        await message.answer(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
+                                         reply_markup=channels_btns())
     else:
-        await state.update_data(buttons=None)
+        await state.set_state(MyChannels.greet_btn_edit)
+        if message.reply_markup:
+            await state.update_data(buttons=message.reply_markup.inline_keyboard)
+        else:
+            await state.update_data(buttons=None)
 
-    await state.update_data(message_id=message.message_id,
-                            message_chat=message.from_user.id)
-    await message.bot.copy_message(message.chat.id, message.chat.id, message.message_id, reply_markup=message.reply_markup)
-    await message.answer(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
+        await state.update_data(message_id=message.message_id,
+                                message_chat=message.from_user.id)
+        await message.bot.copy_message(message.chat.id, message.chat.id, message.message_id, reply_markup=message.reply_markup)
+        await message.answer(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
 
 
 @router.callback_query(MyChannels.greet_btn_edit)
@@ -198,8 +210,8 @@ async def edit_message(callback: types.CallbackQuery, state: FSMContext):
                data['editing_channel'][0]['channel_id'])
         editor('cm_channel_data', 'btns', str(data['buttons']).replace('\'', '"'),
                data['editing_channel'][0]['channel_id'])
-
-        await callback.message.edit_text(GREET_MESSAGE_UPDATED)
+        await callback.message.delete()
+        await callback.message.answer(GREET_MESSAGE_UPDATED,reply_markup=ReplyKeyboardRemove())
         details = get_channels(callback.from_user.id, data['editing_channel'][0]['channel_id'])
         await state.update_data(editing_channel=details)
         await callback.message.answer(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
