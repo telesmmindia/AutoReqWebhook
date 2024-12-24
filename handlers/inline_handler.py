@@ -31,15 +31,18 @@ async def handle_inline_query(iquery: InlineQuery):
                     await iquery.answer(
                         [InlineQueryResultArticle(id='14243143',
                                                   title="Your Created Post",
-                                                  description="well this is your message bitch",
-                                                  input_message_content=InputTextMessageContent(message_text=message_details['text']),
-                                                  reply_markup=InlineKeyboardMarkup(inline_keyboard=eval(message_details['buttons'])))])
+                                                  description="Here is the message you created.",
+                                                  input_message_content=InputTextMessageContent(
+                                                      message_text=message_details['text']),
+                                                  reply_markup=InlineKeyboardMarkup(
+                                                      inline_keyboard=eval(message_details['buttons'])))])
+
             except TypeError:
                 pass
         except IndexError:
             pass
     else:
         await iquery.answer(
-            [InlineQueryResultArticle(id='14243143',title="INVALID RANDI",
-                                      description="well this is an invalid command bitch",
-                                      input_message_content=InputTextMessageContent(message_text='Hello bitch'))])
+            [InlineQueryResultArticle(id='14243143', title="Invalid Command",
+                                      description="This command is not recognized.",
+                                      input_message_content=InputTextMessageContent(message_text='Hello! Please use a valid command.'))])

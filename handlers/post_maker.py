@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, CallbackQuery
 
 from keyboards.InlineKeyboard import main_buttons, edit_msg, get_cancel, inline_back_button, share_save, buttons_btn, \
-    btns_list, select_channels, share_ata_attach_btn
+    btns_list, select_channels, share_ata_attach_btn, PROMO_BTN
 from keyboards.Replykeyboard import back_button, get_n_cancel
 from core.states import post_create
 from core.texts import FWD_POST_FR_BTN, HOW_2_USE_POST_MKR, LNK_FRMT, INCRT_BTN_URL, CHOOSE, START_TEXT, \
@@ -189,6 +189,7 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
             if row:
                 row.pop()
         keyboard = keyboard[:-2]
+        keyboard.append(PROMO_BTN)
         if data['file_id']:
             to_reply = await media_handlers[data['media_type']](callback.from_user.id, data['file_id'],
                                                                 caption=data['caption'],
