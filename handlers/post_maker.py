@@ -89,7 +89,7 @@ async def attach_btn(message:types.Message,state:FSMContext):
                     if media_type == 'photo':
                         file_id = media[0].file_id
                         break
-                    elif media_type == 'animation':
+                    elif media_type in ['animation','audio','voice','video','document']:
                         file_id = media.file_id
                         break
                     else:
@@ -145,7 +145,7 @@ async def schedule_handle(message: types.Message, state: FSMContext):
                             print(media)
                             file_id = media[0].file_id
                             break
-                        elif media_type == 'animation':
+                        elif media_type in ['animation','audio','voice','video','document']:
                             file_id = media.file_id
                             break
                         else:
@@ -213,19 +213,25 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
                 row.pop()
         keyboard = keyboard[:-2]
         keyboard.append(PROMO_BTN)
+        unique_button_id = token_hex(4)
+        bot_ka_details = await callback.bot.get_me()
         if data['file_id']:
             to_reply = await media_handlers[data['media_type']](callback.from_user.id, data['file_id'],
                                                                 caption=data['caption'],
                                                                 reply_markup=InlineKeyboardMarkup(
                                                                     inline_keyboard=keyboard))
+            insert_posts(bot_ka_details.id, callback.from_user.id, unique_button_id, data['caption'], data['file_id'],
+                         unique_button_id,
+                         str(keyboard).replace('\"', '\''))
         else:
             to_reply = await callback.message.answer(data['text'],
                                                      reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
-        unique_button_id = token_hex(4)
-        bot_ka_details = await callback.bot.get_me()
+            insert_posts(bot_ka_details.id, callback.from_user.id, unique_button_id, data['text'], data['file_id'],
+                         unique_button_id,
+                         str(keyboard).replace('\"', '\''))
+
         await to_reply.reply(SHARE_POST.format(bot_ka_details.username,unique_button_id), reply_markup=share_save(f'share {unique_button_id}'))
-        insert_posts(bot_ka_details.id,callback.from_user.id, unique_button_id, data['text'], data['file_id'], unique_button_id,
-                     str(keyboard).replace('\"', '\''))
+
         await state.update_data(button_id =unique_button_id,buttons = str(keyboard),to_copy_if = to_reply.message_id)
         await callback.message.delete()
         await state.set_state(post_create.after_hour)
