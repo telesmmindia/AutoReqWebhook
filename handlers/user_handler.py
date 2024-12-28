@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
     GRT_SET_2_DEF, EDIT_OPTIONS, DEFAULT_ACCEPTTED_TXT, CONFIRM_SET_GREETING_MESSAGE, \
-    GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT
+    GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT, GRT_MSG_DEFAULT
 from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2
 from keyboards.Replykeyboard import get_n_cancel
 from models.database import bot_fetcher, udpate_welcome
@@ -62,7 +62,7 @@ async def start_user_handler(message:Message):
         await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
                                    reply_markup=None if details['btns'] == 'None' else InlineKeyboardBuilder(buttons).as_markup())
     except:
-        await message.answer(GRT_SET_2_DEF,reply_markup=buttons)
+        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name),reply_markup=buttons)
 
 
 @router.callback_query(F.data=="welcome")
