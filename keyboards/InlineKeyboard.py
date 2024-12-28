@@ -9,7 +9,12 @@ def main_buttons():
     keyboard_builder.button(text="🎉 Bot's Welcome Message!", callback_data='welcome')
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
-
+def tutorial_link(tutorial_dict):
+    keyboard_builder = InlineKeyboardBuilder()
+    for i in tutorial_dict.keys():
+        keyboard_builder.button(text=i, url=tutorial_dict[i])
+    keyboard_builder.adjust(1)
+    return keyboard_builder.as_markup(resize_keyboard=True)
 
 def get_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
@@ -69,8 +74,12 @@ def my_users_btn() :
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
-PROMO_BTN = [InlineKeyboardButton(text='Make your own bot ❤️', url='https://t.me/Channel_Guru_Bot'),]
-
+def promo_btn(user_id):
+    PROMO_BTN = [InlineKeyboardButton(text='Create Buttons Here ❤️', url=f'https://t.me/Channel_GuruBot?start={user_id}'), ]
+    return PROMO_BTN
+def promo_btn2(user_id):
+    PROMO_BTN = [InlineKeyboardButton(text='Make your own BOT here❤️', url=f'https://t.me/Channel_GuruBot?start={user_id}'), ]
+    return PROMO_BTN
 def edit_msg(data='',buttons=0,add_to_row=0,add_to_column=0,is_it_the_very_first_with_reply_markup=False): #bitch ass nigga function
     add_to_row = int(add_to_row)
     add_to_column = int(add_to_column)

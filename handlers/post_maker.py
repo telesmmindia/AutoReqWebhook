@@ -9,13 +9,14 @@ import traceback
 
 
 from keyboards.InlineKeyboard import main_buttons, edit_msg, get_cancel, inline_back_button, share_save, buttons_btn, \
-    btns_list, select_channels, share_ata_attach_btn, PROMO_BTN
+    btns_list, select_channels, share_ata_attach_btn, tutorial_link, promo_btn
 from keyboards.Replykeyboard import back_button, get_n_cancel
 from core.states import post_create
 from core.texts import FWD_POST_FR_BTN, HOW_2_USE_POST_MKR, LNK_FRMT, INCRT_BTN_URL, CHOOSE, START_TEXT, \
     CANNOT_EDIT_STICKERS, YOUR_POST, CANCELLED, SEND_TEXT_FOR_BUTTON, NO_BUTTONS_ADDED, ENTER_TEXT_ONLY, BUTTON_SAVED, \
     MAX_BUTTONS_LIMIT, SHARE_POST, UR_BTN, UR_BTN_IS, SND_POST_FR_BTN_ADD, MSG_SNT_TO_CHANNEL, SELECT_CHANNELS, \
-    ENTER_A_NAME_FOR_BUTTON_SET, BUTTON_INSERTED, MSG_SNT_TO_CHANNEL_ALL
+    ENTER_A_NAME_FOR_BUTTON_SET, BUTTON_INSERTED, MSG_SNT_TO_CHANNEL_ALL, ENABLE_INLINE_MODE,INLINE_MODE_DICT, \
+    ADD_BUTTON_DICT, DONT_KNOW_HOW_TO
 from models.database import insert_posts, fetch_buttons, fetch_btn, insert_buttons, get_channels
 from aiogram import Dispatcher, Bot
 from aiogram.client.default import DefaultBotProperties
@@ -30,9 +31,10 @@ async def schedule_handler(callback: types.CallbackQuery,state:FSMContext):
     if inline_mode:
         await callback.answer()
         await state.set_state(post_create.what_do_you_mean)
-        await callback.message.edit_text(CHOOSE,reply_markup=buttons_btn())
+        await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ADD_BUTTON_DICT))
+        await callback.message.answer(CHOOSE,reply_markup=buttons_btn())
     else:
-        await callback.message.edit_text("Please Enable Inline Mode!")
+        await callback.message.edit_text(ENABLE_INLINE_MODE,tutorial_link(INLINE_MODE_DICT))
         await callback.message.answer(CHOOSE,reply_markup=main_buttons())
 
 @router.callback_query(post_create.what_do_you_mean)
@@ -119,6 +121,7 @@ async def attach_btn(message:types.Message,state:FSMContext):
         print(data['btn_id'])
         await x.reply(SHARE_POST.format("BOT NAME",data['btn_id']), reply_markup=share_ata_attach_btn(f'share {data["btn_id"]}'))
         await state.update_data(button_id=data['btn_id'], buttons=str(data['btns_to_attach']), to_copy_if=x.message_id)
+        await message.answer("Choose from the above options!",reply_markup=ReplyKeyboardRemove())
         await state.set_state(post_create.after_hour)
 
 
@@ -212,7 +215,7 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
             if row:
                 row.pop()
         keyboard = keyboard[:-2]
-        keyboard.append(PROMO_BTN)
+        keyboard.append(promo_btn(callback.from_user.id))
         unique_button_id = token_hex(4)
         bot_ka_details = await callback.bot.get_me()
         if data['file_id']:

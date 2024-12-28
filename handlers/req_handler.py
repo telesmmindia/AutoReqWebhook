@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from core.texts import DEFAULT_ACCEPTTED_TXT
-from keyboards.InlineKeyboard import PROMO_BTN
+from keyboards.InlineKeyboard import promo_btn, promo_btn2
 from models.database import unlinked_users, all_channels_id, all_channels_details, find_client, insert_clients
 
 router = Router(name="request_handler")
@@ -27,7 +27,7 @@ async def handle_join_request(message: types.message):
                 if details[0]['btns'] !=0 and details[0]['btns']  not in ['None','0']:
                     try:
                         buttons = eval(details[0]['btns'])
-                        buttons.append(PROMO_BTN)
+                        buttons.append(promo_btn2(details[0]['user_id']))
                         await message.bot.copy_message(message.from_user.id,details[0]['greet_msg_chat'],details[0]['greet_msg'],
                                            reply_markup= None if details[0]['btns']=='None' else InlineKeyboardBuilder(buttons).as_markup()
                                            )
@@ -35,7 +35,7 @@ async def handle_join_request(message: types.message):
                         await message.bot.send_message(message.from_user.id,
                                                        DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
                                                                                     message.chat.title),
-                                                       disable_web_page_preview=True, parse_mode='html',reply_markup=InlineKeyboardMarkup(inline_keyboard=PROMO_BTN))
+                                                       disable_web_page_preview=True, parse_mode='html',reply_markup=InlineKeyboardMarkup(inline_keyboard=promo_btn2(details[0]['user_id'])))
 
                 else:
                     try:
@@ -44,7 +44,7 @@ async def handle_join_request(message: types.message):
                         await message.bot.send_message(message.from_user.id,
                                                        DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
                                                                                     message.chat.title),
-                                                       disable_web_page_preview=True, parse_mode='html',reply_markup=InlineKeyboardMarkup(inline_keyboard=PROMO_BTN))
+                                                       disable_web_page_preview=True, parse_mode='html',reply_markup=InlineKeyboardMarkup(inline_keyboard=promo_btn2(details[0]['user_id'])))
 
             elif details[0]['greet_msg']==0:
                 if find_client(message.chat.id, message.from_user.id, details[0]['user_id']) == 0:

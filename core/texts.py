@@ -1,3 +1,20 @@
+
+#--------------------------ALL LINKS-------------
+
+TUTORIAL_CHANNEL_LINK="@ChannelGuruBot_Tutorials"
+ALL_REQUEST_ACCEPT_DICT={"Add Channel":"https://t.me/ChannelGuruBot_Tutorials/4",
+                         "My Channel":"https://t.me/ChannelGuruBot_Tutorials/5",
+                         "Broadcast Message":"https://t.me/ChannelGuruBot_Tutorials/6"}
+CREATE_BOT_DICT={"Create Bot Tutorial":"https://t.me/ChannelGuruBot_Tutorials/7",}
+ADD_BUTTON_DICT={"Create Post With Button":"https://t.me/ChannelGuruBot_Tutorials/9","Use Saved Buttons Tutorial":"https://t.me/ChannelGuruBot_Tutorials/10"}
+INLINE_MODE_DICT={"Inline Mode Tutorial":"https://t.me/ChannelGuruBot_Tutorials/8"}
+BOT_WELCOME_DICT={"Set Bot's Welcome Message":"https://t.me/ChannelGuruBot_Tutorials/11"}
+#--------------------------ALL LINKS-------------
+DONT_KNOW_HOW_TO = """
+<i>Don't know how to use this feature? ❓
+Watch the video tutorial here 🎥👇</i>
+"""
+
 CHOOSE = "🔘 <b>Choose:</b>"
 BOT_NOT_ADMIN = 'The Bot is not an Admin in your Channel ☹ Named\n<b>{}</b>\nMake sure the Bot is Admin and Resend the Post Here!'
 FRWD_POST_FRM_CHNL_ONLY = '🔄 Please forward a message from your channel only'
@@ -11,13 +28,18 @@ BROADCAST_SUMMARY = """📊 <b>Broadcast Summary</b>
 <i>Send /start to see bot buttons!</i>
 """
 
-DEFAULT_ACCEPTTED_TXT = '''Hey <b>{}</b>,
-Your Request to join channel <b>{}</b> is Accepted
-To Know My Features Send /start or /help!
+DEFAULT_ACCEPTTED_TXT = '''👋 Hey <b>{}</b>,
 
-<i>Bot created by @Channel_Guru_Bot ❤️</i>
+🎉 Your request to join the channel <b>{}</b> has been accepted!  
+To explore my features, send <code>/start</code> or <code>/help</code>.
+
+<i>🤖 This bot is powered by @ChannelGuru_Bot ❤️</i>
 '''
 
+ENABLE_INLINE_MODE = (
+    "⚙️ <b>Please enable Inline Mode on your bot!</b>\n\n"
+    "📺 <i>For any help, watch the tutorial below!</i>"
+)
 FWD_POST_FR_BTN = "👉 Forward the post where you want to attach buttons, or\n💬 Send any message or picture!"
 HOW_2_USE_POST_MKR = '''Hey there! Just a quick heads up:
 • The prompt with the ➕ button is where you can <i>add options for your post</i>

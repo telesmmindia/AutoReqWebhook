@@ -6,9 +6,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
-     GRT_SET_2_DEF, EDIT_OPTIONS, DEFAULT_ACCEPTTED_TXT, CONFIRM_SET_GREETING_MESSAGE, \
-    GREET_MESSAGE_UPDATED
-from keyboards.InlineKeyboard import get_keyboard, yesno, PROMO_BTN, main_buttons, edit_btns
+    GRT_SET_2_DEF, EDIT_OPTIONS, DEFAULT_ACCEPTTED_TXT, CONFIRM_SET_GREETING_MESSAGE, \
+    GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT
+from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2
 from keyboards.Replykeyboard import get_n_cancel
 from models.database import bot_fetcher, udpate_welcome
 
@@ -42,7 +42,8 @@ async def start_admin_handler(message:Message,state:FSMContext):
 @router.callback_query(F.data=='request')
 async def reqquest_handlersdaasdf(callback:CallbackQuery,state:FSMContext):
     await state.clear()
-    await callback.message.edit_text(CHOOSE, reply_markup=get_keyboard())
+    await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ALL_REQUEST_ACCEPT_DICT))
+    await callback.message.answer(CHOOSE, reply_markup=get_keyboard())
 
 @router.callback_query(F.data=='back-2_main')
 async def back_to_ad(callback:CallbackQuery,state:FSMContext):
@@ -54,9 +55,9 @@ async def start_user_handler(message:Message):
     details = bot_fetcher(message.bot.token)
     buttons = eval(details['btns'])
     try:
-        buttons.append(PROMO_BTN)
+        buttons.append(promo_btn2(details['user_id']))
     except:
-        buttons=InlineKeyboardMarkup(inline_keyboard=[PROMO_BTN])
+        buttons=InlineKeyboardMarkup(inline_keyboard=[promo_btn2(details['user_id'])])
     try:
         await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
                                    reply_markup=None if details['btns'] == 'None' else InlineKeyboardBuilder(buttons).as_markup())
@@ -68,12 +69,13 @@ async def start_user_handler(message:Message):
 async def set_welcome_of_bot(message:Message,state:FSMContext):
     details = bot_fetcher(message.bot.token)
     await state.set_state(set_welcome.change_post)
+    await message.bot.send_message(text=DONT_KNOW_HOW_TO,chat_id=message.from_user.id,reply_markup=tutorial_link(BOT_WELCOME_DICT))
     try:
         message_to_cum_on = await message.bot.copy_message(message.from_user.id,details['user_id'],details['u_w_msg_id'],
                                                        reply_markup = None if details['btns'] == 'None' else InlineKeyboardBuilder(eval(details['btns'])).as_markup())
         await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
     except:
-        await message.bot.send_message(chat_id=message.from_user.id,text=DEFAULT_ACCEPTTED_TXT,reply_markup=get_n_cancel())
+        await message.bot.send_message(chat_id=message.from_user.id,text=DEFAULT_ACCEPTTED_TXT)
         await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
 
 @router.callback_query(set_welcome.change_post)
