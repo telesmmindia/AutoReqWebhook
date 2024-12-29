@@ -33,7 +33,9 @@ class SetWelcomeFilter(BaseFilter):
         return message.text == '/set_welcome' and message.from_user.id == bot_details['user_id'] and bot_details['bot_status'] ==1
 
 router = Router(name="user_router")
-
+@router.callback_query(F.data == 'back')
+async def add_channel(callback: CallbackQuery,state:FSMContext) -> None:
+    await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
 @router.message(AdminFilter())
 async def start_admin_handler(message:Message,state:FSMContext):
     await state.clear()
