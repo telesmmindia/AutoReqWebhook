@@ -98,9 +98,9 @@ async def attach_btn(message:types.Message,state:FSMContext):
                         file_id = media['file_id']
                         break
         if file_id is None:
-            text = message.text
+            text = message.html_text
         else:
-            caption = message.caption
+            caption = message.html_text
 
         media_handlers = {
             'photo': message.answer_photo,
@@ -165,11 +165,12 @@ async def schedule_handle(message: types.Message, state: FSMContext):
                             break
 
                 if file_id is None:
-                    text = message.text
+                    text = message.html_text
                     await state.update_data(text=text, file_id=None, caption=None)
                 else:
-                    caption = message.caption
+                    caption = message.html_text
                     await state.update_data(text=None, file_id=file_id, caption=caption)
+
                 await state.update_data(url_post=[])
                 await message.answer(YOUR_POST, reply_markup=types.ReplyKeyboardRemove())
                 media_handlers = {
