@@ -116,18 +116,18 @@ async def attach_btn(message:types.Message,state:FSMContext):
                     x = await handler(file_id, caption=caption,
                                       reply_markup=InlineKeyboardMarkup(inline_keyboard=data['btns_to_attach']))
                     insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, data['caption'],
-                                 data['file_id'],
+                                 file_id,
                                  data['btn_id'],
                                  str(data['btns_to_attach']).replace('\"', '\''))
                     break
         else:
             x = await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=data['btns_to_attach']))
-            insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, data['text'], data['file_id'],
+            insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, data['text'], file_id,
                          data['btn_id'],
                          str(data['btns_to_attach']).replace('\"', '\''))
 
         await state.update_data(to_reply=x)
-        await x.reply(SHARE_POST.format("BOT NAME",data['btn_id']), reply_markup=share_ata_attach_btn(f'share {data["btn_id"]}'))
+        await x.reply(SHARE_POST.format("BOT NAME",data['btn_id']), reply_markup=share_ata_attach_btn(f'share {unique_post_id}'))
         await state.update_data(button_id=data['btn_id'], buttons=str(data['btns_to_attach']), to_copy_if=x.message_id)
 
         await message.answer("Choose from the above options!",reply_markup=ReplyKeyboardRemove())
