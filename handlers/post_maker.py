@@ -243,7 +243,7 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
                          unique_button_id,
                          str(keyboard).replace('\"', '\''))
 
-        await to_reply.reply(SHARE_POST.format(bot_ka_details.username,unique_button_id), reply_markup=share_save(f'share {unique_button_id}'))
+        await to_reply.reply(SHARE_POST.format(bot_ka_details.username,unique_button_id), reply_markup=share_save(f'share {unique_post_id}'))
 
         await state.update_data(button_id =unique_button_id,buttons = str(keyboard),to_copy_if = to_reply.message_id)
         await callback.message.delete()
