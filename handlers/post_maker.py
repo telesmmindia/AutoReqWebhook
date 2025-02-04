@@ -42,7 +42,7 @@ async def soemthign(callback:types.CallbackQuery,state:FSMContext):
     if callback.data == 'add-button':
         await state.set_state(post_create.check_message)
         await callback.message.delete()
-        await callback.message.answer(FWD_POST_FR_BTN, reply_markup=get_n_cancel())
+        await callback.message.answer(FWD_POST_FR_BTN, reply_markup=inline_back_button())
     elif callback.data == 'my-buttons':
         await state.set_state(post_create.add_button_to_post)
         user_buttons = fetch_buttons(callback.from_user.id)
@@ -136,70 +136,65 @@ async def attach_btn(message:types.Message,state:FSMContext):
 
 @router.message(post_create.check_message)
 async def schedule_handle(message: types.Message, state: FSMContext):
-    if "cancel" in message.text.lower():
-        await state.set_state(post_create.what_do_you_mean)
-        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
-        await message.answer(CHOOSE, reply_markup=buttons_btn())
-    else:
-        if message.text != '⬅️ Back':
-            if message.sticker:
-                await message.answer(CANNOT_EDIT_STICKERS)
-            else:
-                await state.set_state(post_create.post_edit)
-                file_id = None
-                caption = None
-                text = None
-                for media_type in ['photo', 'video', 'audio', 'animation', 'document', 'voice']:
-                    media = getattr(message, media_type, None)
-                    if media:
-                        await state.update_data(media_type=media_type)
-                        if media_type == 'photo':
-                            print(media)
-                            file_id = media[0].file_id
-                            break
-                        elif media_type in ['animation','audio','voice','video','document']:
-                            file_id = media.file_id
-                            break
-                        else:
-                            file_id = media['file_id']
-                            break
-
-                if file_id is None:
-                    text = message.html_text
-                    await state.update_data(text=text, file_id=None, caption=None)
-                else:
-                    caption = message.html_text
-                    await state.update_data(text=None, file_id=file_id, caption=caption)
-
-                await state.update_data(url_post=[])
-                await message.answer(YOUR_POST, reply_markup=types.ReplyKeyboardRemove())
-                media_handlers = {
-                    'photo': message.reply_photo,
-                    'video': message.reply_video,
-                    'audio': message.reply_audio,
-                    'animation': message.reply_animation,
-                }
-
-                if message.reply_markup:
-                    keyboard = edit_msg(buttons=message.reply_markup.inline_keyboard,
-                                        is_it_the_very_first_with_reply_markup=True)
-                else:
-                    keyboard = edit_msg(buttons=[])
-                await state.update_data(keyboard=keyboard)
-
-                if file_id:
-                    for media_type, handler in media_handlers.items():
-                        if getattr(message, media_type, None):
-                            x = await handler(file_id, caption=caption,
-                                              reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
-                            break
-                else:
-                    x = await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
-
+    if message.text != '⬅️ Back':
+        if message.sticker:
+            await message.answer(CANNOT_EDIT_STICKERS)
         else:
-            await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove())
-            await message.answer(START_TEXT, reply_markup=main_buttons())
-            await state.clear()
+            await state.set_state(post_create.post_edit)
+            file_id = None
+            caption = None
+            text = None
+            for media_type in ['photo', 'video', 'audio', 'animation', 'document', 'voice']:
+                media = getattr(message, media_type, None)
+                if media:
+                    await state.update_data(media_type=media_type)
+                    if media_type == 'photo':
+                        print(media)
+                        file_id = media[0].file_id
+                        break
+                    elif media_type in ['animation','audio','voice','video','document']:
+                        file_id = media.file_id
+                        break
+                    else:
+                        file_id = media['file_id']
+                        break
+
+            if file_id is None:
+                text = message.html_text
+                await state.update_data(text=text, file_id=None, caption=None)
+            else:
+                caption = message.html_text
+                await state.update_data(text=None, file_id=file_id, caption=caption)
+
+            await state.update_data(url_post=[])
+            await message.answer(YOUR_POST, reply_markup=types.ReplyKeyboardRemove())
+            media_handlers = {
+                'photo': message.reply_photo,
+                'video': message.reply_video,
+                'audio': message.reply_audio,
+                'animation': message.reply_animation,
+            }
+
+            if message.reply_markup:
+                keyboard = edit_msg(buttons=message.reply_markup.inline_keyboard,
+                                    is_it_the_very_first_with_reply_markup=True)
+            else:
+                keyboard = edit_msg(buttons=[])
+            await state.update_data(keyboard=keyboard)
+
+            if file_id:
+                for media_type, handler in media_handlers.items():
+                    if getattr(message, media_type, None):
+                        x = await handler(file_id, caption=caption,
+                                          reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
+                        break
+            else:
+                x = await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
+
+    else:
+        await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(START_TEXT, reply_markup=main_buttons())
+        await state.clear()
 
 
 @router.callback_query(post_create.post_edit)
