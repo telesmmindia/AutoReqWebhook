@@ -116,6 +116,18 @@ def all_clients(owner=0,channel=0,col=0):
         print(e)
         pass
 
+def all_clients_count():
+    query = f"SELECT COUNT(DISTINCT user_id) AS distinct_user_count FROM req_bots;"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return p.fetchall()
+    except Exception as e:
+        print(e)
+        pass
+
 def channel_remover(user_id,channel_id):
     query = f'delete from cm_channel_data where user_id = {user_id} and channel_id={channel_id}'
     try:
