@@ -10,13 +10,12 @@ from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
     GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT, GRT_MSG_DEFAULT
 from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2
 from keyboards.Replykeyboard import get_n_cancel
-from models.database import bot_fetcher, udpate_welcome
+from models.database import bot_fetcher, udpate_welcome, all_clients_count
 
 
 class AdminFilter(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         bot_token = message.bot.token
-        print(bot_token)
         bot_details = bot_fetcher(bot_token)
         return message.text == '/start' and message.from_user.id == bot_details['user_id'] and bot_details['bot_status'] ==1
 
@@ -45,6 +44,11 @@ async def reqquest_handlersdaasdf(callback:CallbackQuery,state:FSMContext):
     await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ALL_REQUEST_ACCEPT_DICT))
     await callback.message.answer(CHOOSE, reply_markup=get_keyboard())
 
+@router.message(F.text=='/users',F.from_user.id ==6849558445)
+async def back_to_ad(message:Message):
+    users = all_clients_count()
+    await message.answer(f'<b>{users["distinct_user_count"]}</b> users are using this bot ')
+
 @router.callback_query(F.data=='back-2_main')
 async def back_to_ad(callback:CallbackQuery,state:FSMContext):
     await state.clear()
@@ -59,8 +63,7 @@ async def start_user_handler(message:Message):
     except:
         buttons=InlineKeyboardMarkup(inline_keyboard=[promo_btn2(details['user_id'])])
     try:
-        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],
-                                   reply_markup=None if details['btns'] == 'None' else InlineKeyboardBuilder(buttons).as_markup())
+        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],reply_markup=buttons)
     except:
         await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name),reply_markup=buttons)
 
