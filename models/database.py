@@ -84,7 +84,6 @@ def get_channels(id=0,name=0):
         query = f"SELECT * FROM cm_channel_data WHERE user_id='{id}'"
     else:
         query = f"SELECT * FROM cm_channel_data WHERE user_id='{id}' and channel_id = '{name}'"
-
     try:
         connection = get_connection()
         p = connection.cursor()
