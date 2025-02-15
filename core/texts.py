@@ -146,3 +146,5 @@ SND_POST_FR_BTN_ADD = '📤 Send a post to attach these buttons'
 SELECT_CHANNELS = "📡 Select channels to send the message"
 MSG_SNT_TO_CHANNEL = "✅ Message sent to the selected channel"
 MSG_SNT_TO_CHANNEL_ALL = "✅ Message sent to all channels"
+ADD_CHANNEL = "📢 <b>Click on the button below to add a channel.</b> ⬇️"
+CHANNEL_SAVED = "✅ <b>Channel saved successfully!</b> 🎉"
