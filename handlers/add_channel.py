@@ -16,8 +16,9 @@ router = Router(name="add_channel")
 @router.callback_query(F.data=="Add Channel")
 async def add_channel(message: types.CallbackQuery,state:FSMContext) -> None:
     await state.set_state(AddChannel.channel_id)
-    await message.message.delete()
     await message.message.answer(ADD_CHANNEL,reply_markup=add_channel_request())
+    await message.message.delete()
+
 
 @router.message(F.chat_shared,AddChannel.channel_id)
 async def channel_id_get(message: types.Message,state: FSMContext):
