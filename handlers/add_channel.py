@@ -50,7 +50,8 @@ async def channel_greet_get(callback: types.CallbackQuery,state:FSMContext):
     data = await state.get_data()
     if callback.data == 'default':
         data['greet_msg'] = '0'
-        await callback.message.answer(GRT_SET_2_DEF,parse_mode='Markdown')
+        bot_details= await callback.bot.get_me()
+        await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username),parse_mode='Markdown')
         channel_data_inserter(bot_id=callback.bot.id,channel_id=data['channel_id'], user_id=callback.from_user.id, greet_msg=data['greet_msg'],channel_name=data['channel_name'])
         await callback.message.answer(CHANNEL_INSERTED, reply_markup=ReplyKeyboardRemove())
         await callback.message.answer(CHOOSE,reply_markup=get_keyboard())

@@ -18,7 +18,7 @@ Watch the video tutorial here 🎥👇</i>
 CHOOSE = "🔘 <b>Choose:</b>"
 BOT_NOT_ADMIN = 'The Bot is not an Admin in your Channel ☹ Named\n<b>{}</b>\nMake sure the Bot is Admin and Resend the Post Here!'
 FRWD_POST_FRM_CHNL_ONLY = '🔄 Please forward a message from your channel only'
-GRT_SET_2_DEF = 'Greeting Message Set to:\n`Hey {username},\nYour Request is Accepted By Channel Guru Bot 🛐! \n\nTo Know My Features Send /start or /help!`'
+GRT_SET_2_DEF = 'Greeting Message Set to:\n`Hey {username},\nYour Request is Accepted By @{}'
 GRT_MSG_DEFAULT = 'Hey <b>{}</b>,\nYour Request is Accepted By @{}'
 FORWARD_YOUR_POST = "🔄 Forward a post from your channel"
 CHANNEL_INSERTED = "Channel Data Inserted Successfully ✅📊"
