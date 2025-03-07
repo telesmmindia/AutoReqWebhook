@@ -54,9 +54,13 @@ async def channel_edit(callback: types.CallbackQuery, state: FSMContext):
                                                             'btns'] == 'None' else InlineKeyboardBuilder(
                                        eval(data['editing_channel'][0]['btns'])).as_markup())
             except Exception as e:
-                await callback.message.answer(GRT_SET_2_DEF)
+                bot_details = await callback.bot.get_me()
+
+                await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username))
         else:
-            await callback.message.answer(GRT_SET_2_DEF)
+            bot_details = await callback.bot.get_me()
+
+            await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username))
 
         await callback.message.answer(EDIT_OPTIONS, reply_markup=edit_btns())
 

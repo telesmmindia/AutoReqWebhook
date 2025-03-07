@@ -69,7 +69,8 @@ async def start_user_handler(message:Message):
     try:
         await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],reply_markup=buttons)
     except:
-        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name),reply_markup=buttons)
+        bot_details = await message.bot.get_me()
+        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name,bot_details.username),reply_markup=buttons)
 
 
 @router.callback_query(F.data=="welcome")
