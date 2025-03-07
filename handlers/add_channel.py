@@ -20,7 +20,7 @@ async def add_channel(message: types.CallbackQuery,state:FSMContext) -> None:
 
 @router.message(AddChannel.channel_id)
 async def channel_id_get(message: types.Message,state: FSMContext):
-    if "cancel" in message.text.lower():
+    if message.text and  "cancel" in message.text.lower():
         await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
         await message.answer(CHOOSE,reply_markup=get_keyboard())
         await state.clear()
