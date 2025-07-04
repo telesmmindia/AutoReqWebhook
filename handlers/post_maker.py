@@ -115,14 +115,14 @@ async def attach_btn(message:types.Message,state:FSMContext):
                 if getattr(message, media_type, None):
                     x = await handler(file_id, caption=caption,
                                       reply_markup=InlineKeyboardMarkup(inline_keyboard=data['btns_to_attach']))
-                    insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, data['caption'],
+                    insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, caption,
                                  file_id,
                                  data['btn_id'],
                                  str(data['btns_to_attach']).replace('\"', '\''))
                     break
         else:
             x = await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=data['btns_to_attach']))
-            insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, data['text'], file_id,
+            insert_posts(bot_ka_details.id, message.from_user.id, unique_post_id, text, file_id,
                          data['btn_id'],
                          str(data['btns_to_attach']).replace('\"', '\''))
 

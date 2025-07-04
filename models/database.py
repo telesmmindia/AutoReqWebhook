@@ -84,7 +84,6 @@ def get_channels(id=0,name=0):
         query = f"SELECT * FROM cm_channel_data WHERE user_id='{id}'"
     else:
         query = f"SELECT * FROM cm_channel_data WHERE user_id='{id}' and channel_id = '{name}'"
-
     try:
         connection = get_connection()
         p = connection.cursor()
@@ -106,6 +105,18 @@ def all_clients(owner=0,channel=0,col=0):
 
     else:
         query = f"select {col} from cm_data where owner_user_id = {owner} and channel_id = '{channel}'"
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query)
+        connection.close()
+        return p.fetchall()
+    except Exception as e:
+        print(e)
+        pass
+
+def all_clients_count():
+    query = f"SELECT COUNT(DISTINCT user_id) AS distinct_user_count FROM req_bots;"
     try:
         connection = get_connection()
         p = connection.cursor()
