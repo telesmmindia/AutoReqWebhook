@@ -181,7 +181,7 @@ def udpate_welcome(bot_id,mesage_id,btns):
         pass
 
 def unlinked_users(channel_id,user_id,channel_name):
-    query = f'INSERT INTO unlink_users VALUES ({user_id},{channel_id},"{channel_name}")'
+    query = f'INSERT INTO unlink_users(user_id,channel_id,channel_name) VALUES ({user_id},{channel_id},"{channel_name}")'
     try:
         connection = get_connection()
         p = connection.cursor()
@@ -230,7 +230,7 @@ def find_client(channel_id,user_id,admin_id):
         pass
 
 def insert_clients(bot_id,channel_id,user_id,channel_name,owner_user_id):
-    query = f'INSERT INTO cm_data VALUES ({bot_id},{channel_id},{user_id},"{channel_name}","{owner_user_id}",1)'
+    query = f'INSERT INTO cm_data(bot_id,channel_id,user_id,channel_name,owner_user_id,message) VALUES ({bot_id},{channel_id},{user_id},"{channel_name}","{owner_user_id}",1)'
     try:
         connection = get_connection()
         p = connection.cursor()
@@ -242,7 +242,7 @@ def insert_clients(bot_id,channel_id,user_id,channel_name,owner_user_id):
         pass
 
 def insert_posts(bot_id,user_id,button_id,text,file_id,button_name,buttons):
-    query = f'INSERT INTO webhook_saved_messages VALUES ({bot_id},{user_id},"{button_id}","{text}","{file_id}","{button_name}","{buttons}")'
+    query = f'INSERT INTO webhook_saved_messages(bot_id,user_id,post_id,text,file_id,button_name,buttons) VALUES ({bot_id},{user_id},"{button_id}","{text}","{file_id}","{button_name}","{buttons}")'
     try:
         connection = get_connection()
         p = connection.cursor()
@@ -267,7 +267,7 @@ def fetch_post(id):
         pass
 
 def insert_buttons(user_id,button_id,button_name,buttons):
-    query = f'INSERT INTO user_buttons VALUES ({user_id},"{button_id}","{button_name}","{buttons}")'
+    query = f'INSERT INTO user_buttons(user_id,button_id,button_name,buttons) VALUES ({user_id},"{button_id}","{button_name}","{buttons}")'
     print(query)
     try:
         connection = get_connection()
