@@ -47,10 +47,10 @@ async def reqquest_handlersdaasdf(callback:CallbackQuery,state:FSMContext):
     await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ALL_REQUEST_ACCEPT_DICT))
     await callback.message.answer(CHOOSE, reply_markup=get_keyboard())
 
-@router.message(F.text=='/users',F.from_user.id ==6849558445)
+@router.message(F.text=='/users',F.from_user.id ==7425140710)
 async def back_to_ad(message:Message):
     users = all_clients_count()
-    await message.answer(f'<b>{users["distinct_user_count"]}</b> users are using this bot ')
+    await message.answer(f'<b>{users[0]["distinct_user_count"]}</b> users are using this bot ')
 
 
 @router.callback_query(F.data=='back-2_main')
