@@ -62,15 +62,18 @@ async def back_to_ad(callback:CallbackQuery,state:FSMContext):
 async def start_user_handler(message:Message):
     details = bot_fetcher(message.bot.token)
     buttons = eval(details['btns'])
-    try:
-        buttons.append(promo_btn2(details['user_id']))
-    except:
-        buttons=InlineKeyboardMarkup(inline_keyboard=[promo_btn2(details['user_id'])])
+    buttons = InlineKeyboardMarkup(inline_keyboard=buttons)
+    if str(details['bot_id'])!='8130984037':
+        try:
+            buttons.append(promo_btn2(details['user_id']))
+        except:
+            buttons=InlineKeyboardMarkup(inline_keyboard=[promo_btn2(details['user_id'])])
     try:
         await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],reply_markup=buttons)
     except:
+        print(buttons)
         bot_details = await message.bot.get_me()
-        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name,bot_details.username),reply_markup=buttons)
+        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name,bot_details.username),reply_markup=buttons,disable_web_page_preview=True)
 
 
 @router.callback_query(F.data=="welcome")

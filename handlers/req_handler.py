@@ -24,14 +24,17 @@ async def handle_join_request(message: types.message):
                     insert_clients(message.bot.id,message.chat.id, message.from_user.id, details[0]['channel_name'],details[0]['user_id'])
                 else:
                     print('User Already in database')
+
                 if details[0]['btns'] !=0 and details[0]['btns']  not in ['None','0']:
                     try:
                         buttons = eval(details[0]['btns'])
-                        buttons.append(promo_btn2(details[0]['user_id']))
+                        if str(details[0]['bot_id']) != '8130984037':
+                            buttons.append(promo_btn2(details[0]['user_id']))
                         await message.bot.copy_message(message.from_user.id,details[0]['greet_msg_chat'],details[0]['greet_msg'],
                                            reply_markup= None if details[0]['btns']=='None' else InlineKeyboardBuilder(buttons).as_markup()
                                            )
-                    except:
+                    except Exception as e:
+                        print(traceback.format_exc())
                         await message.bot.send_message(message.from_user.id,
                                                        DEFAULT_ACCEPTTED_TXT.format(message.from_user.first_name,
                                                                                     message.chat.title),

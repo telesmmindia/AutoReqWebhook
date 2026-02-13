@@ -64,7 +64,7 @@ async def channel_greet_get(callback: types.CallbackQuery,state:FSMContext):
 
 @router.message(AddChannel.greet_msg)
 async def channel_greet_get(message: types.Message,state:FSMContext):
-    if "cancel" in message.text.lower():
+    if message.text and "cancel" in message.text.lower():
         await message.delete()
         await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
         await message.answer(CHOOSE,reply_markup=get_keyboard())
