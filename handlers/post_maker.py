@@ -32,23 +32,23 @@ async def schedule_handler(callback: types.CallbackQuery,state:FSMContext):
         await callback.answer()
         await state.set_state(post_create.what_do_you_mean)
         await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ADD_BUTTON_DICT), disable_web_page_preview=True)
-        await callback.message.answer(CHOOSE,reply_markup=buttons_btn())
+        await callback.message.answer(CHOOSE,reply_markup=buttons_btn(), disable_web_page_preview=True)
     else:
         await callback.message.edit_text(ENABLE_INLINE_MODE, reply_markup=tutorial_link(INLINE_MODE_DICT), disable_web_page_preview=True)
-        await callback.message.answer(CHOOSE,reply_markup=main_buttons())
+        await callback.message.answer(CHOOSE,reply_markup=main_buttons(), disable_web_page_preview=True)
 
 @router.callback_query(post_create.what_do_you_mean)
 async def soemthign(callback:types.CallbackQuery,state:FSMContext):
     if callback.data == 'add-button':
         await state.set_state(post_create.check_message)
         await callback.message.delete()
-        await callback.message.answer(FWD_POST_FR_BTN, reply_markup=inline_back_button())
+        await callback.message.answer(FWD_POST_FR_BTN, reply_markup=inline_back_button(), disable_web_page_preview=True)
     elif callback.data == 'my-buttons':
         await state.set_state(post_create.add_button_to_post)
         user_buttons = fetch_buttons(callback.from_user.id)
-        await callback.message.edit_text(UR_BTN, reply_markup=btns_list(user_buttons))
+        await callback.message.edit_text(UR_BTN, reply_markup=btns_list(user_buttons), disable_web_page_preview=True)
     elif 'back' in callback.data:
-        await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
+        await callback.message.edit_text(CHOOSE,reply_markup=main_buttons(), disable_web_page_preview=True)
 
 
 
@@ -57,13 +57,13 @@ async def add_btn_to_post(callback: CallbackQuery,state:FSMContext):
     try:
         if callback.data =='back':
             await state.set_state(post_create.what_do_you_mean)
-            await callback.message.edit_text(CHOOSE, reply_markup=buttons_btn())
+            await callback.message.edit_text(CHOOSE, reply_markup=buttons_btn(), disable_web_page_preview=True)
         else:
             btn = fetch_btn(callback.data)
             await state.update_data(btns_to_attach = eval(btn['buttons']),btn_id = btn['button_id'])
             await state.set_state(post_create.kaunsa_post_may_daalna_btn)
-            await callback.message.edit_text(UR_BTN_IS,reply_markup=InlineKeyboardMarkup(inline_keyboard=eval(btn['buttons'])))
-            await callback.message.answer(SND_POST_FR_BTN_ADD,reply_markup=get_n_cancel())
+            await callback.message.edit_text(UR_BTN_IS,reply_markup=InlineKeyboardMarkup(inline_keyboard=eval(btn['buttons'])), disable_web_page_preview=True)
+            await callback.message.answer(SND_POST_FR_BTN_ADD,reply_markup=get_n_cancel(), disable_web_page_preview=True)
 
     except Exception as error:
         print(Fore.RED + str(error) + Style.RESET_ALL)
@@ -75,15 +75,15 @@ async def attach_btn(message:types.Message,state:FSMContext):
     if message.text == '❌ Cancel':
         await state.set_state(post_create.add_button_to_post)
         user_buttons = fetch_buttons(message.from_user.id)
-        await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove())
-        await message.answer(UR_BTN, reply_markup=btns_list(user_buttons))
+        await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove(), disable_web_page_preview=True)
+        await message.answer(UR_BTN, reply_markup=btns_list(user_buttons), disable_web_page_preview=True)
     else:
         data = await state.get_data()
         file_id = None
         caption = None
         text = None
         if message.sticker:
-            await message.answer(CANNOT_EDIT_STICKERS)
+            await message.answer(CANNOT_EDIT_STICKERS, disable_web_page_preview=True)
         else:
             for media_type in ['photo', 'video', 'audio', 'animation', 'document', 'voice']:
                 media = getattr(message, media_type, None)
@@ -138,7 +138,7 @@ async def attach_btn(message:types.Message,state:FSMContext):
 async def schedule_handle(message: types.Message, state: FSMContext):
     if message.text != '⬅️ Back':
         if message.sticker:
-            await message.answer(CANNOT_EDIT_STICKERS)
+            await message.answer(CANNOT_EDIT_STICKERS, disable_web_page_preview=True)
         else:
             await state.set_state(post_create.post_edit)
             file_id = None
@@ -167,7 +167,7 @@ async def schedule_handle(message: types.Message, state: FSMContext):
                 await state.update_data(text=None, file_id=file_id, caption=caption)
 
             await state.update_data(url_post=[])
-            await message.answer(YOUR_POST, reply_markup=types.ReplyKeyboardRemove())
+            await message.answer(YOUR_POST, reply_markup=types.ReplyKeyboardRemove(), disable_web_page_preview=True)
             media_handlers = {
                 'photo': message.reply_photo,
                 'video': message.reply_video,
@@ -192,8 +192,8 @@ async def schedule_handle(message: types.Message, state: FSMContext):
                 x = await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
 
     else:
-        await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove())
-        await message.answer(START_TEXT, reply_markup=main_buttons())
+        await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove(), disable_web_page_preview=True)
+        await message.answer(START_TEXT, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
 
 
@@ -206,7 +206,7 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
         # print('when you click',add_to_row,add_to_column)
         await state.update_data(add_to_row=add_to_row, add_to_column=add_to_column)
         await state.set_state(post_create.button_text)
-        await callback.message.answer(SEND_TEXT_FOR_BUTTON, reply_markup=get_n_cancel())
+        await callback.message.answer(SEND_TEXT_FOR_BUTTON, reply_markup=get_n_cancel(), disable_web_page_preview=True)
 
     elif callback.data == 'post':
         media_handlers = {
@@ -251,24 +251,24 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
 async def button_adder(message: types.Message, state: FSMContext):
     if message.text:
         if message.text.lower() == 'cancel':
-            await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove())
-            await message.answer(START_TEXT, reply_markup=main_buttons())
+            await message.answer(CANCELLED, reply_markup=types.ReplyKeyboardRemove(), disable_web_page_preview=True)
+            await message.answer(START_TEXT, reply_markup=main_buttons(), disable_web_page_preview=True)
             await state.clear()
         else:
             await state.set_state(post_create.button_link)
             await state.update_data(a=message.text)
-            await message.answer(LNK_FRMT, reply_markup=get_n_cancel())
+            await message.answer(LNK_FRMT, reply_markup=get_n_cancel(), disable_web_page_preview=True)
     else:
-        await message.answer(ENTER_TEXT_ONLY)
+        await message.answer(ENTER_TEXT_ONLY, disable_web_page_preview=True)
 
 
 @router.message(post_create.button_link)
 async def button_adder(message: types.Message, state: FSMContext):
     li = list(message.text)
     if "cancel" in message.text.lower():
-        await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove())
+        await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         await state.set_state(post_create.what_do_you_mean)
-        await message.answer(CHOOSE, reply_markup=buttons_btn())
+        await message.answer(CHOOSE, reply_markup=buttons_btn(), disable_web_page_preview=True)
     else:
         if li[0] == "@":
             url = message.text
@@ -283,7 +283,7 @@ async def button_adder(message: types.Message, state: FSMContext):
             data = await state.get_data()
             if len(data['url_post']) <= 5:
                 data['url_post'].append({f"{data['a']}": f"{url}"})
-                await message.answer(BUTTON_SAVED,reply_markup=ReplyKeyboardRemove())
+                await message.answer(BUTTON_SAVED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
                 await state.set_state(post_create.post_edit)
                 if data['file_id']:  # if it has a photo or video
                     media_handlers = {
@@ -308,14 +308,14 @@ async def button_adder(message: types.Message, state: FSMContext):
                     await state.update_data(url_post=[])
                     await message.answer(data['text'], reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
             else:
-                await message.answer(MAX_BUTTONS_LIMIT)
+                await message.answer(MAX_BUTTONS_LIMIT, disable_web_page_preview=True)
         else:
-            await message.answer(INCRT_BTN_URL)
+            await message.answer(INCRT_BTN_URL, disable_web_page_preview=True)
 
 @router.callback_query(post_create.after_hour)
 async def save_bttn(callback:types.CallbackQuery,state:FSMContext):
     if callback.data=='save':
-        await callback.message.answer(ENTER_A_NAME_FOR_BUTTON_SET,reply_markup=get_n_cancel())
+        await callback.message.answer(ENTER_A_NAME_FOR_BUTTON_SET,reply_markup=get_n_cancel(), disable_web_page_preview=True)
         await state.set_state(post_create.save_button)
     elif callback.data == 'channel':
         await state.set_state(post_create.handle_channel_send)
@@ -324,11 +324,11 @@ async def save_bttn(callback:types.CallbackQuery,state:FSMContext):
         for channel in channels:
             to_send.append({channel['channel_name'] : f'{channel["channel_id"]}/0'})
         await state.update_data(to_send = to_send)
-        await callback.message.answer(SELECT_CHANNELS,reply_markup=select_channels(to_send))
+        await callback.message.answer(SELECT_CHANNELS,reply_markup=select_channels(to_send), disable_web_page_preview=True)
 
     elif callback.data == 'main':
         await callback.message.delete()
-        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
 
 @router.callback_query(post_create.handle_channel_send)
@@ -352,8 +352,8 @@ async def handle_channel_sng(callback:CallbackQuery,state:FSMContext):
                         print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
                         await callback.message.answer(f'Cannot Send to {key}\nERROR : {e}')
 
-        await callback.message.edit_text(MSG_SNT_TO_CHANNEL)
-        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await callback.message.edit_text(MSG_SNT_TO_CHANNEL, disable_web_page_preview=True)
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
     elif callback.data == 'all':
         data = await state.get_data()
@@ -372,13 +372,13 @@ async def handle_channel_sng(callback:CallbackQuery,state:FSMContext):
                     print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
                     await callback.message.answer(f'Cannot Send to {key}\nERROR : {e}')
 
-        await callback.message.edit_text(MSG_SNT_TO_CHANNEL_ALL)
-        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await callback.message.edit_text(MSG_SNT_TO_CHANNEL_ALL, disable_web_page_preview=True)
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
 
     elif callback.data == 'cancel':
-        await callback.message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove())
-        await callback.message.answer(CHOOSE, reply_markup=main_buttons())
+        await callback.message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
     else:
         data = await state.get_data()
@@ -389,18 +389,18 @@ async def handle_channel_sng(callback:CallbackQuery,state:FSMContext):
                 if channel_id in value:
                     dictionary[key] = f"{channel_id}/{'0' if current_state =='1' else '1'}"
                     break
-        await callback.message.edit_text(SELECT_CHANNELS,reply_markup=select_channels(to_send))
+        await callback.message.edit_text(SELECT_CHANNELS,reply_markup=select_channels(to_send), disable_web_page_preview=True)
 
 
 @router.message(post_create.save_button)
 async def saving_Btn(message:types.Message,state:FSMContext):
     data = await state.get_data()
     if "cancel" in message.text.lower():
-        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
-        await message.answer(CHOOSE,reply_markup=main_buttons())
+        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+        await message.answer(CHOOSE,reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
     else:
         insert_buttons(message.from_user.id,data['button_id'],message.text,data['buttons'])
-        await message.answer(BUTTON_INSERTED,reply_markup=ReplyKeyboardRemove())
-        await message.answer(CHOOSE, reply_markup=main_buttons())
+        await message.answer(BUTTON_INSERTED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+        await message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()

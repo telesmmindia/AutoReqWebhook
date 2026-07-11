@@ -34,18 +34,18 @@ class SetWelcomeFilter(BaseFilter):
 router = Router(name="user_router")
 @router.callback_query(F.data == 'back')
 async def add_channel(callback: CallbackQuery,state:FSMContext) -> None:
-    await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
+    await callback.message.edit_text(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
 @router.message(AdminFilter())
 async def start_admin_handler(message:Message,state:FSMContext):
     await state.clear()
-    await message.answer(CHOOSE,reply_markup=main_buttons())
+    await message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
 
 
 @router.callback_query(F.data=='request')
 async def reqquest_handlersdaasdf(callback:CallbackQuery,state:FSMContext):
     await state.clear()
-    await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ALL_REQUEST_ACCEPT_DICT))
-    await callback.message.answer(CHOOSE, reply_markup=get_keyboard())
+    await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ALL_REQUEST_ACCEPT_DICT), disable_web_page_preview=True)
+    await callback.message.answer(CHOOSE, reply_markup=get_keyboard(), disable_web_page_preview=True)
 
 @router.message(F.text=='/users',F.from_user.id ==7425140710)
 async def back_to_ad(message:Message):
@@ -56,7 +56,7 @@ async def back_to_ad(message:Message):
 @router.callback_query(F.data=='back-2_main')
 async def back_to_ad(callback:CallbackQuery,state:FSMContext):
     await state.clear()
-    await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
+    await callback.message.edit_text(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
 
 @router.message(UserFilter())
 async def start_user_handler(message:Message):
@@ -84,24 +84,24 @@ async def start_user_handler(message:Message):
 async def set_welcome_of_bot(message:Message,state:FSMContext):
     details = bot_fetcher(message.bot.token)
     await state.set_state(set_welcome.change_post)
-    await message.bot.send_message(text=DONT_KNOW_HOW_TO,chat_id=message.from_user.id,reply_markup=tutorial_link(BOT_WELCOME_DICT))
+    await message.bot.send_message(text=DONT_KNOW_HOW_TO, chat_id=message.from_user.id, reply_markup=tutorial_link(BOT_WELCOME_DICT), disable_web_page_preview=True)
     try:
         message_to_cum_on = await message.bot.copy_message(message.from_user.id,details['user_id'],details['u_w_msg_id'],
                                                        reply_markup = None if details['btns'] == 'None' else InlineKeyboardBuilder(eval(details['btns'])).as_markup())
-        await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
+        await message.bot.send_message(chat_id=message.from_user.id, text=EDIT_OPTIONS, reply_markup=edit_btns(), disable_web_page_preview=True)
     except:
         is_premium = check_premium(details['user_id'])
-        await message.bot.send_message(chat_id=message.from_user.id,text=get_default_accepted_txt(message.from_user.first_name, "your channel", is_premium))
-        await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
+        await message.bot.send_message(chat_id=message.from_user.id, text=get_default_accepted_txt(message.from_user.first_name, "your channel", is_premium), disable_web_page_preview=True)
+        await message.bot.send_message(chat_id=message.from_user.id, text=EDIT_OPTIONS, reply_markup=edit_btns(), disable_web_page_preview=True)
 
 @router.callback_query(set_welcome.change_post)
 async def change_post_fuinc(callback:CallbackQuery,state:FSMContext):
     if callback.data=='cancel':
-        await callback.message.edit_text(CHOOSE,reply_markup=main_buttons())
+        await callback.message.edit_text(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
         await state.clear()
     else:
         await callback.message.delete()
-        await callback.message.answer(SEND_NEW_WELCOME_MSG,reply_markup=get_n_cancel())
+        await callback.message.answer(SEND_NEW_WELCOME_MSG, reply_markup=get_n_cancel(), disable_web_page_preview=True)
         await state.set_state(set_welcome.get_welcome)
 
 @router.message(set_welcome.get_welcome)
@@ -117,8 +117,8 @@ async def get_welcome_msg(message: Message,state:FSMContext):
             testis = await message.send_copy(chat_id=message.from_user.id,reply_markup=message.reply_markup)
             await testis.reply(CONFIRM_SET_GREETING_MESSAGE,reply_markup=yesno())
         else:
-            await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
-            await message.answer(CHOOSE,reply_markup=main_buttons())
+            await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+            await message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
             await state.clear()
     else:
         await state.set_state(set_welcome.confirmation)
@@ -136,10 +136,10 @@ async def confirm_welcome(callback:CallbackQuery,state:FSMContext):
         data = await state.get_data()
         udpate_welcome(callback.bot.id,data['message_id'],str(data['buttons']).replace('\'','"'))
         await callback.message.delete()
-        await callback.message.answer(GREET_MESSAGE_UPDATED,reply_markup=ReplyKeyboardRemove())
-        await callback.message.answer(CHOOSE,reply_markup=main_buttons())
+        await callback.message.answer(GREET_MESSAGE_UPDATED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+        await callback.message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
     else:
-        await callback.message.edit_text(CANCELLED, reply_markup=main_buttons())
+        await callback.message.edit_text(CANCELLED, reply_markup=main_buttons(), disable_web_page_preview=True)
     await state.clear()
 
 

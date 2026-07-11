@@ -23,19 +23,19 @@ router = Router(name="my_channel")
 @router.callback_query(F.data == "My Channels")
 async def my_channels(message: types.CallbackQuery, state: FSMContext) -> None:
     await state.set_state(MyChannels.show)
-    await message.message.edit_text(YOUR_CHANNELS, reply_markup=channels_new(get_channels(message.from_user.id)))
+    await message.message.edit_text(YOUR_CHANNELS, reply_markup=channels_new(get_channels(message.from_user.id)), disable_web_page_preview=True)
 
 
 @router.callback_query(MyChannels.show)
 async def channel_details(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == 'back':
-        await callback.message.edit_text(CHOOSE, reply_markup=get_keyboard())
+        await callback.message.edit_text(CHOOSE, reply_markup=get_keyboard(), disable_web_page_preview=True)
         await state.clear()
     else:
         await state.set_state(MyChannels.edit)
         details = get_channels(callback.from_user.id, callback.data)
         await state.update_data(editing_channel=details)
-        await callback.message.edit_text(CHANNEL_DETAILS.format(details[0]['channel_name'],details[0]['channel_id']),reply_markup=channels_btns())
+        await callback.message.edit_text(CHANNEL_DETAILS.format(details[0]['channel_name'],details[0]['channel_id']),reply_markup=channels_btns(), disable_web_page_preview=True)
 
 
 
@@ -56,33 +56,33 @@ async def channel_edit(callback: types.CallbackQuery, state: FSMContext):
             except Exception as e:
                 bot_details = await callback.bot.get_me()
 
-                await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username))
+                await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username), disable_web_page_preview=True)
         else:
             bot_details = await callback.bot.get_me()
 
-            await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username))
+            await callback.message.answer(GRT_SET_2_DEF.format(bot_details.username), disable_web_page_preview=True)
 
-        await callback.message.answer(EDIT_OPTIONS, reply_markup=edit_btns())
+        await callback.message.answer(EDIT_OPTIONS, reply_markup=edit_btns(), disable_web_page_preview=True)
 
     elif callback.data == 'post':
         if data['create_post']:
-            await callback.message.answer(data['create_post'])
+            await callback.message.answer(data['create_post'], disable_web_page_preview=True)
         else:
-            await callback.message.answer(NO_POST_CREATED)
+            await callback.message.answer(NO_POST_CREATED, disable_web_page_preview=True)
 
     elif callback.data == 'promo':
         await state.set_state(MyChannels.count)
         await callback.message.delete()
-        await callback.message.answer(BROADCAST_USER_COUNT.format(all_clients(callback.from_user.id, data["editing_channel"][0]["channel_id"])[0]["count(*)"]),reply_markup=get_n_cancel())
+        await callback.message.answer(BROADCAST_USER_COUNT.format(all_clients(callback.from_user.id, data["editing_channel"][0]["channel_id"])[0]["count(*)"]),reply_markup=get_n_cancel(), disable_web_page_preview=True)
 
     elif callback.data == 'remove':
         await state.set_state(MyChannels.remove)
-        await callback.message.edit_text(CONFIRM_REMOVE_CHANNEL, reply_markup=yesno())
+        await callback.message.edit_text(CONFIRM_REMOVE_CHANNEL, reply_markup=yesno(), disable_web_page_preview=True)
 
     elif callback.data == 'back':
         await state.set_state(MyChannels.show)
         await callback.message.edit_text('📡📈 Your Channels',
-                                         reply_markup=channels_new(get_channels(callback.from_user.id)))
+                                         reply_markup=channels_new(get_channels(callback.from_user.id)), disable_web_page_preview=True)
 
 
 @router.callback_query(MyChannels.remove)
@@ -91,14 +91,14 @@ async def edit_message(message: types.CallbackQuery, state: FSMContext):
     if message.data == 'Yes':
         await state.set_state(MyChannels.show)
         channel_remover(message.from_user.id, data['editing_channel'][0]['channel_id'])
-        await message.message.edit_text(CHANNEL_REMOVED_SUCCESS)
-        await message.message.answer(YOUR_CHANNELS, reply_markup=channels_new(get_channels(message.from_user.id)))
+        await message.message.edit_text(CHANNEL_REMOVED_SUCCESS, disable_web_page_preview=True)
+        await message.message.answer(YOUR_CHANNELS, reply_markup=channels_new(get_channels(message.from_user.id)), disable_web_page_preview=True)
     elif 'No' in message.data:
         await state.set_state(MyChannels.show)
         await message.message.edit_text(YOUR_CHANNELS,
-                                        reply_markup=channels_new(get_channels(message.from_user.id)))
+                                        reply_markup=channels_new(get_channels(message.from_user.id)), disable_web_page_preview=True)
     else:
-        await message.answer(UNKNOWN_CHOICE)
+        await message.answer(UNKNOWN_CHOICE, disable_web_page_preview=True)
 
 
 @router.message(MyChannels.count)
@@ -108,17 +108,17 @@ async def edit_message(message: types.Message, state: FSMContext):
     if message.text.isnumeric():
         await state.set_state(MyChannels.promo)
         await state.update_data(users_count=message.text)
-        await message.answer(SEND_BROADCAST_MESSAGE)
+        await message.answer(SEND_BROADCAST_MESSAGE, disable_web_page_preview=True)
     elif 'cancel' in message.text.lower():
         data = await state.get_data()
         details = get_channels(message.from_user.id, data['editing_channel'][0]['channel_id'])
         await state.update_data(editing_channel=details)
-        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
+        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         await message.answer(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
-                                         reply_markup=channels_btns())
+                                         reply_markup=channels_btns(), disable_web_page_preview=True)
         await state.set_state(MyChannels.edit)
     else:
-        await message.answer(ENTER_NUMBER_ONLY)
+        await message.answer(ENTER_NUMBER_ONLY, disable_web_page_preview=True)
 
 
 @router.message(MyChannels.promo)
@@ -127,9 +127,9 @@ async def edit_message(message: types.Message, state: FSMContext):
         data = await state.get_data()
         details = get_channels(message.from_user.id, data['editing_channel'][0]['channel_id'])
         await state.update_data(editing_channel=details)
-        await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove())
+        await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         await message.answer(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
-                             reply_markup=channels_btns())
+                             reply_markup=channels_btns(), disable_web_page_preview=True)
         await state.set_state(MyChannels.edit)
     else:
         await state.set_state(MyChannels.run_promo)
@@ -137,7 +137,7 @@ async def edit_message(message: types.Message, state: FSMContext):
                                 buttons=message.reply_markup)
         await message.bot.copy_message(message.from_user.id, message.from_user.id, message.message_id,
                                reply_markup=message.reply_markup)
-        await message.answer(CONFIRM_RUN_MESSAGE, reply_markup=yesno())
+        await message.answer(CONFIRM_RUN_MESSAGE, reply_markup=yesno(), disable_web_page_preview=True)
 
 
 @router.callback_query(MyChannels.run_promo)
@@ -149,10 +149,10 @@ async def edit_message(calback: types.CallbackQuery, state: FSMContext):
         clients_ids = [i['user_id'] for i in clients]
         # bal = get_bal(calback.from_user.id)[0]['bal']
         if len(clients) == 0:
-            await calback.message.answer(NO_USERS_MESSAGE, reply_markup=get_keyboard())
+            await calback.message.answer(NO_USERS_MESSAGE, reply_markup=get_keyboard(), disable_web_page_preview=True)
         else:
-            await calback.message.answer(SENDING_MESSAGE_TO_USERS, reply_markup=ReplyKeyboardRemove())
-            await calback.message.answer(CHOOSE,reply_markup=get_keyboard())
+            await calback.message.answer(SENDING_MESSAGE_TO_USERS, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
+            await calback.message.answer(CHOOSE,reply_markup=get_keyboard(), disable_web_page_preview=True)
             await state.clear()
             task = asyncio.create_task(send_message_broad(clients=clients_ids, forward_from=data['forward_from'],
                                                           message_id=data['message_id'], btn=data['buttons'],
@@ -161,7 +161,7 @@ async def edit_message(calback: types.CallbackQuery, state: FSMContext):
 
 
     elif calback.data == 'No':
-        await calback.message.answer(CANCELLED, reply_markup=get_keyboard())
+        await calback.message.answer(CANCELLED, reply_markup=get_keyboard(), disable_web_page_preview=True)
         await state.clear()
 
 
@@ -170,17 +170,17 @@ async def edit_message(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == 'change':
         await state.set_state(MyChannels.greet_msg_edit)
         await callback.message.delete()
-        await callback.message.answer(SEND_NEW_POST,reply_markup=get_n_cancel())
+        await callback.message.answer(SEND_NEW_POST,reply_markup=get_n_cancel(), disable_web_page_preview=True)
 
     elif callback.data == 'cancel':
         await state.set_state(MyChannels.edit)
         details = get_channels(callback.from_user.id)
         await state.update_data(editing_channel=details)
         await callback.message.edit_text(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
-                                         reply_markup=channels_btns())
+                                         reply_markup=channels_btns(), disable_web_page_preview=True)
 
     else:
-        await callback.message.answer(UNKNOWN_CHOICE)
+        await callback.message.answer(UNKNOWN_CHOICE, disable_web_page_preview=True)
 
 
 @router.message(MyChannels.greet_msg_edit)
@@ -189,9 +189,9 @@ async def edit_message(message: types.Message, state: FSMContext):
         await state.set_state(MyChannels.edit)
         details = get_channels(message.from_user.id)
         await state.update_data(editing_channel=details)
-        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove())
+        await message.answer(CANCELLED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         await message.answer(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
-                                         reply_markup=channels_btns())
+                                         reply_markup=channels_btns(), disable_web_page_preview=True)
     else:
         await state.set_state(MyChannels.greet_btn_edit)
         if message.reply_markup:
@@ -202,7 +202,7 @@ async def edit_message(message: types.Message, state: FSMContext):
         await state.update_data(message_id=message.message_id,
                                 message_chat=message.from_user.id)
         await message.bot.copy_message(message.chat.id, message.chat.id, message.message_id, reply_markup=message.reply_markup)
-        await message.answer(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
+        await message.answer(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno(), disable_web_page_preview=True)
 
 
 @router.callback_query(MyChannels.greet_btn_edit)
@@ -215,16 +215,16 @@ async def edit_message(callback: types.CallbackQuery, state: FSMContext):
         editor('cm_channel_data', 'btns', str(data['buttons']).replace('\'', '"'),
                data['editing_channel'][0]['channel_id'])
         await callback.message.delete()
-        await callback.message.answer(GREET_MESSAGE_UPDATED,reply_markup=ReplyKeyboardRemove())
+        await callback.message.answer(GREET_MESSAGE_UPDATED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         details = get_channels(callback.from_user.id, data['editing_channel'][0]['channel_id'])
         await state.update_data(editing_channel=details)
         await callback.message.answer(CHANNEL_DETAILS.format(details[0]['channel_name'], details[0]['channel_id']),
-                                         reply_markup=channels_btns())
+                                         reply_markup=channels_btns(), disable_web_page_preview=True)
 
         await state.set_state(MyChannels.edit)
 
     elif callback.data == 'No':
-        await callback.message.edit_text(CANCELLED, reply_markup=get_keyboard())
+        await callback.message.edit_text(CANCELLED, reply_markup=get_keyboard(), disable_web_page_preview=True)
         await state.clear()
     else:
-        await callback.message.answer(UNKNOWN_CHOICE)
+        await callback.message.answer(UNKNOWN_CHOICE, disable_web_page_preview=True)
