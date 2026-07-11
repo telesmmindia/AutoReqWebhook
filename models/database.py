@@ -32,10 +32,26 @@ def bot_fetcher(bot_token):
         query = f"SELECT * FROM req_bots where bot_token='{bot_token}'"
         cursor.execute(query)
         return cursor.fetchone()
-
     except Exception as error:
         print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
         logging.error(error)
+    finally:
+        con.close()
+
+def check_premium(user_id):
+    try:
+        con = get_connection()
+        cursor = con.cursor()
+        query = f"SELECT is_premium FROM cm_admin where user_id={user_id}"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result and result.get('is_premium'):
+            return True
+        return False
+    except Exception as error:
+        print(Fore.RED + traceback.format_exc() + Style.RESET_ALL)
+        logging.error(error)
+        return False
     finally:
         con.close()
 

@@ -220,7 +220,9 @@ async def schedule_handle(callback: types.CallbackQuery, state: FSMContext):
             if row:
                 row.pop()
         keyboard = keyboard[:-2]
-        keyboard.append(promo_btn(callback.from_user.id))
+        promo = promo_btn(callback.from_user.id)
+        if promo:
+            keyboard.append(promo)
         unique_button_id = token_hex(4)
         unique_post_id = token_hex(4)
         bot_ka_details = await callback.bot.get_me()

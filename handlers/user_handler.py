@@ -6,11 +6,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
-    GRT_SET_2_DEF, EDIT_OPTIONS, DEFAULT_ACCEPTTED_TXT, CONFIRM_SET_GREETING_MESSAGE, \
+    GRT_SET_2_DEF, EDIT_OPTIONS, get_default_accepted_txt, CONFIRM_SET_GREETING_MESSAGE, \
     GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT, GRT_MSG_DEFAULT
 from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2
 from keyboards.Replykeyboard import get_n_cancel
-from models.database import bot_fetcher, udpate_welcome, all_clients_count
+from models.database import bot_fetcher, udpate_welcome, all_clients_count, check_premium
 
 
 class AdminFilter(BaseFilter):
@@ -65,9 +65,13 @@ async def start_user_handler(message:Message):
     buttons = InlineKeyboardMarkup(inline_keyboard=buttons)
     if str(details['bot_id'])!='8130984037':
         try:
-            buttons.append(promo_btn2(details['user_id']))
+            promo = promo_btn2(details['user_id'])
+            if promo:
+                buttons.append(promo)
         except:
-            buttons=InlineKeyboardMarkup(inline_keyboard=[promo_btn2(details['user_id'])])
+            promo = promo_btn2(details['user_id'])
+            if promo:
+                buttons=InlineKeyboardMarkup(inline_keyboard=[promo])
     try:
         await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],reply_markup=buttons)
     except:
@@ -86,7 +90,8 @@ async def set_welcome_of_bot(message:Message,state:FSMContext):
                                                        reply_markup = None if details['btns'] == 'None' else InlineKeyboardBuilder(eval(details['btns'])).as_markup())
         await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
     except:
-        await message.bot.send_message(chat_id=message.from_user.id,text=DEFAULT_ACCEPTTED_TXT)
+        is_premium = check_premium(details['user_id'])
+        await message.bot.send_message(chat_id=message.from_user.id,text=get_default_accepted_txt(message.from_user.first_name, "your channel", is_premium))
         await message.bot.send_message(chat_id=message.from_user.id,text=EDIT_OPTIONS, reply_markup=edit_btns())
 
 @router.callback_query(set_welcome.change_post)

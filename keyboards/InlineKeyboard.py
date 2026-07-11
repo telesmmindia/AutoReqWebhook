@@ -74,10 +74,17 @@ def my_users_btn() :
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
 
+from models.database import check_premium
+
 def promo_btn(user_id):
+    if check_premium(user_id):
+        return []
     PROMO_BTN = [InlineKeyboardButton(text='Create Buttons Here ❤️', url=f'https://t.me/Channel_GuruBot?start={user_id}'), ]
     return PROMO_BTN
+
 def promo_btn2(user_id):
+    if check_premium(user_id):
+        return []
     PROMO_BTN = [InlineKeyboardButton(text='Make your own BOT here❤️', url=f'https://t.me/Channel_GuruBot?start={user_id}'),InlineKeyboardButton(text='🚀 Get Views & Members Now!️', url=f'https://t.me/TelesmmViews2Bot?start=ref-1020'), ]
     return PROMO_BTN
 def edit_msg(data='',buttons=0,add_to_row=0,add_to_column=0,is_it_the_very_first_with_reply_markup=False): #bitch ass nigga function

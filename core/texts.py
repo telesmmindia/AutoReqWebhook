@@ -29,13 +29,15 @@ BROADCAST_SUMMARY = """📊 <b>Broadcast Summary</b>
 <i>Send /start to see bot buttons!</i>
 """
 
-DEFAULT_ACCEPTTED_TXT = '''👋 Hey <b>{}</b>,
+def get_default_accepted_txt(first_name, title, is_premium):
+    text = f'''👋 Hey <b>{first_name}</b>,
 
-🎉 Your request to join the channel <b>{}</b> has been accepted!  
-To explore my features, send <code>/start</code> or <code>/help</code>.
+🎉 Your request to join the channel <b>{title}</b> has been accepted!  
+To explore my features, send <code>/start</code> or <code>/help</code>.'''
+    if not is_premium:
+        text += "\n\n<i>🤖 This bot is powered by @ChannelGuru_Bot ❤️</i>"
+    return text
 
-<i>🤖 This bot is powered by @ChannelGuru_Bot ❤️</i>
-'''
 
 ENABLE_INLINE_MODE = (
     "⚙️ <b>Please enable Inline Mode on your bot!</b>\n\n"
