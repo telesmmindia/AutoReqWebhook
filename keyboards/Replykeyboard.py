@@ -51,9 +51,6 @@ def add_channel_request():
                             request_chat=KeyboardButtonRequestChat(
                                 request_id=1,
                                 chat_is_channel=True,
-                                bot_is_member=False,
-                                user_administrator_rights=required_admin_rights,
-                                bot_administrator_rights= required_bot_rights,
                                 request_title=True,
                                 request_username=True
                             ))
