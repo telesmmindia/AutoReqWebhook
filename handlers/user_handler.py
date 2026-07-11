@@ -3,7 +3,7 @@ from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
     GRT_SET_2_DEF, EDIT_OPTIONS, get_default_accepted_txt, CONFIRM_SET_GREETING_MESSAGE, \
@@ -109,7 +109,7 @@ async def get_welcome_msg(message: Message,state:FSMContext):
                 await state.update_data(buttons = message.reply_markup.inline_keyboard)
             else:
                 await state.update_data(buttons = None)
-            testis = await message.send_copy(chat_id=message.from_user.id,reply_markup=message.reply_markup)
+            testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup, link_preview_options=LinkPreviewOptions(is_disabled=True))
             await testis.reply(CONFIRM_SET_GREETING_MESSAGE,reply_markup=yesno())
         else:
             await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
@@ -122,7 +122,7 @@ async def get_welcome_msg(message: Message,state:FSMContext):
             await state.update_data(buttons=message.reply_markup.inline_keyboard)
         else:
             await state.update_data(buttons=None)
-        testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup)
+        testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup, link_preview_options=LinkPreviewOptions(is_disabled=True))
         await testis.reply(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
 
 @router.callback_query(set_welcome.confirmation)
