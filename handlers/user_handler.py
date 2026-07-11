@@ -61,23 +61,18 @@ async def back_to_ad(callback:CallbackQuery,state:FSMContext):
 @router.message(UserFilter())
 async def start_user_handler(message:Message):
     details = bot_fetcher(message.bot.token)
-    buttons = eval(details['btns'])
-    buttons = InlineKeyboardMarkup(inline_keyboard=buttons)
-    if str(details['bot_id'])!='8130984037':
-        try:
-            promo = promo_btn2(details['user_id'])
-            if promo:
-                buttons.append(promo)
-        except:
-            promo = promo_btn2(details['user_id'])
-            if promo:
-                buttons=InlineKeyboardMarkup(inline_keyboard=[promo])
+    raw_buttons = eval(details['btns'])
+    if str(details['bot_id']) != '8130984037':
+        promo = promo_btn2(details['user_id'])
+        if promo:
+            raw_buttons.append(promo)
+    buttons = InlineKeyboardMarkup(inline_keyboard=raw_buttons)
     try:
-        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'],reply_markup=buttons)
+        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'], reply_markup=buttons)
     except:
         print(buttons)
         bot_details = await message.bot.get_me()
-        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name,bot_details.username),reply_markup=buttons,disable_web_page_preview=True)
+        await message.answer(GRT_MSG_DEFAULT.format(message.from_user.first_name, bot_details.username), reply_markup=buttons, disable_web_page_preview=True)
 
 
 @router.callback_query(F.data=="welcome")
