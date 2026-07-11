@@ -109,7 +109,12 @@ async def get_welcome_msg(message: Message,state:FSMContext):
                 await state.update_data(buttons = message.reply_markup.inline_keyboard)
             else:
                 await state.update_data(buttons = None)
-            testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup, link_preview_options=LinkPreviewOptions(is_disabled=True))
+            testis = await message.answer(
+                message.html_text,
+                reply_markup=message.reply_markup,
+                parse_mode='HTML',
+                link_preview_options=LinkPreviewOptions(is_disabled=True)
+            )
             await testis.reply(CONFIRM_SET_GREETING_MESSAGE,reply_markup=yesno())
         else:
             await message.answer(CANCELLED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
@@ -122,7 +127,7 @@ async def get_welcome_msg(message: Message,state:FSMContext):
             await state.update_data(buttons=message.reply_markup.inline_keyboard)
         else:
             await state.update_data(buttons=None)
-        testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup, link_preview_options=LinkPreviewOptions(is_disabled=True))
+        testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup)
         await testis.reply(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
 
 @router.callback_query(set_welcome.confirmation)
