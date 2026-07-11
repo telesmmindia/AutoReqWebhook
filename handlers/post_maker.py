@@ -34,7 +34,7 @@ async def schedule_handler(callback: types.CallbackQuery,state:FSMContext):
         await callback.message.edit_text(DONT_KNOW_HOW_TO, reply_markup=tutorial_link(ADD_BUTTON_DICT))
         await callback.message.answer(CHOOSE,reply_markup=buttons_btn())
     else:
-        await callback.message.edit_text(ENABLE_INLINE_MODE,tutorial_link(INLINE_MODE_DICT))
+        await callback.message.edit_text(ENABLE_INLINE_MODE, reply_markup=tutorial_link(INLINE_MODE_DICT))
         await callback.message.answer(CHOOSE,reply_markup=main_buttons())
 
 @router.callback_query(post_create.what_do_you_mean)
