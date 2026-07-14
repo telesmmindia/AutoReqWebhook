@@ -18,7 +18,7 @@ async def handle_join_request(message: types.message):
         find = all_channels_id()
         if int(message.chat.id) in find:
             details = all_channels_details(message.chat.id)
-            #print(details)
+            print(f"[DEBUG join_request] channel_id={message.chat.id} row={details[0]}")
             if details[0]['greet_msg']!=0:
                 if find_client(message.chat.id,message.from_user.id,details[0]['user_id'])==0:
                     insert_clients(message.bot.id,message.chat.id, message.from_user.id, details[0]['channel_name'],details[0]['user_id'])
@@ -27,14 +27,22 @@ async def handle_join_request(message: types.message):
 
                 if details[0]['btns'] !=0 and details[0]['btns']  not in ['None','0']:
                     try:
-                        buttons = eval(details[0]['btns'])
+                        try:
+                            buttons = eval(details[0]['btns'])
+                        except Exception as eval_err:
+                            print(f"[DEBUG join_request] eval(btns) FAILED: {eval_err!r} raw_btns={details[0]['btns']!r}")
+                            raise
                         if str(details[0]['bot_id']) != '8130984037':
                             buttons.append(promo_btn2(details[0]['user_id']))
                             # Remove empty lists appended by promo_btn2 if premium
                             buttons = [b for b in buttons if b]
-                        await message.bot.copy_message(message.from_user.id,details[0]['greet_msg_chat'],details[0]['greet_msg'],
-                                           reply_markup= None if details[0]['btns']=='None' else InlineKeyboardBuilder(buttons).as_markup()
-                                           )
+                        try:
+                            await message.bot.copy_message(message.from_user.id,details[0]['greet_msg_chat'],details[0]['greet_msg'],
+                                               reply_markup= None if details[0]['btns']=='None' else InlineKeyboardBuilder(buttons).as_markup()
+                                               )
+                        except Exception as copy_err:
+                            print(f"[DEBUG join_request] copy_message FAILED: {copy_err!r} greet_msg_chat={details[0]['greet_msg_chat']!r} greet_msg={details[0]['greet_msg']!r}")
+                            raise
                     except Exception as e:
                         print(traceback.format_exc())
                         is_premium = check_premium(details[0]['user_id'])
