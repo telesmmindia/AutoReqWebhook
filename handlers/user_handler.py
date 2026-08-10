@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.filters import BaseFilter
+from aiogram.filters import BaseFilter, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -7,8 +7,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LinkPrevie
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
     GRT_SET_2_DEF, EDIT_OPTIONS, get_default_accepted_txt, CONFIRM_SET_GREETING_MESSAGE, \
-    GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT, GRT_MSG_DEFAULT
-from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2
+    GREET_MESSAGE_UPDATED, ALL_REQUEST_ACCEPT_DICT, DONT_KNOW_HOW_TO, BOT_WELCOME_DICT, GRT_MSG_DEFAULT, \
+    get_owner_help_text, get_user_help_text
+from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2, \
+    owner_support_btn
 from keyboards.Replykeyboard import get_n_cancel
 from models.database import bot_fetcher, udpate_welcome, all_clients_count, check_premium
 
@@ -39,6 +41,35 @@ async def add_channel(callback: CallbackQuery,state:FSMContext) -> None:
 async def start_admin_handler(message:Message,state:FSMContext):
     await state.clear()
     await message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
+
+
+async def _owner_username(bot, owner_id):
+    """The clone bot's owner @username, so support points at them and not at us.
+    The owner has always started their own bot, so get_chat resolves."""
+    try:
+        chat = await bot.get_chat(owner_id)
+        return chat.username
+    except Exception:
+        return None
+
+
+@router.message(Command('help'))
+async def help_handler(message: Message, state: FSMContext):
+    bot_details = bot_fetcher(message.bot.token)
+    if not bot_details or bot_details['bot_status'] != 1:
+        return
+    me = await message.bot.get_me()
+    if message.from_user.id == bot_details['user_id']:
+        await state.clear()
+        await message.answer(get_owner_help_text(me.username), disable_web_page_preview=True)
+        await message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
+    else:
+        owner = await _owner_username(message.bot, bot_details['user_id'])
+        await message.answer(
+            get_user_help_text(me.username, owner),
+            reply_markup=owner_support_btn(owner, bot_details['user_id']),
+            disable_web_page_preview=True,
+        )
 
 
 @router.callback_query(F.data=='request')

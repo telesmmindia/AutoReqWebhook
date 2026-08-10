@@ -93,7 +93,7 @@ def channel_data_inserter(bot_id=0, channel_id=0, user_id=0, greet_msg=0, channe
         connection.commit()
 
     except Exception as e:
-        print(f"Here in channel_data_inserter func : {e}")
+        print(f"[DEBUG channel_data_inserter] INSERT FAILED: {e!r} btns={btns!r}")
 
 def get_channels(id=0,name=0):
     if name == 0:

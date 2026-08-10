@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
@@ -81,6 +81,20 @@ def promo_btn(user_id):
         return []
     PROMO_BTN = [InlineKeyboardButton(text='Create Buttons Here ❤️', url=f'https://t.me/Channel_GuruBot?start={user_id}'), ]
     return PROMO_BTN
+
+def owner_support_btn(owner_username, user_id=None):
+    """Support button for a clone bot: points at that bot's own owner.
+    Non-premium owners still get the promo row underneath."""
+    rows = []
+    if owner_username:
+        rows.append([InlineKeyboardButton(text='🆘 Contact Support', url=f'https://t.me/{owner_username}')])
+    if user_id is not None:
+        promo = promo_btn2(user_id)
+        if promo:
+            rows.append(promo)
+    if not rows:
+        return None
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 def promo_btn2(user_id):
     if check_premium(user_id):

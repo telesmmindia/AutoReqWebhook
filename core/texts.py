@@ -62,13 +62,36 @@ BOT_ALREADY_AUTOVIEWS = '⚠️ This bot is already being used. Please use a dif
 BOT_ALREADY_EXISTS = "⚠️ This bot already exists. Enter another token or send /start."
 ENTER_A_VALID_TOKEN = "<b>Please enter a valid bot token:</b>"
 
-HELP_TEXT = '''Channel Guru Bot 🛐🚀 - Your Ultimate Channel Management Assistant!
+def get_owner_help_text(bot_username):
+    """Help shown to the person who owns this bot — feature list, no support handle
+    (they are their own admin here)."""
+    return f'''<b>@{bot_username} 🚀 — Your Channel Management Assistant!</b>
 
-👉 Accept join requests and send personalized greeting messages 💌.
-👉 Store subscriber details for easy access, even after they leave your channel 😉.
-👉 Create eye-catching buttons for your posts to boost engagement 😍.
+👉 <b>Accept join requests</b> automatically and send your own greeting message 💌.
+👉 <b>Store subscriber details</b> so you can reach them even after they leave your channel 😉.
+👉 <b>Create eye-catching buttons</b> for your posts to boost engagement 😍.
+👉 <b>Broadcast</b> to everyone who joined through your channels 📢.
 
-💡 Open to suggestions! New features coming soon 🔜🎥.'''
+<b>Commands:</b>
+• /start — open the main menu
+• /set_welcome — change the message new users get
+• /help — show this message
+
+💡 Send /start and use the buttons to get going.'''
+
+
+def get_user_help_text(bot_username, owner_username=None):
+    """Help shown to everyone else — subscribers of the owner's channels.
+    Support points at the bot's own owner, never at us."""
+    text = f'''<b>About @{bot_username}</b>
+
+🤝 This bot approves join requests for its channels and sends you a welcome message once you're in.
+📬 It may also send you updates from the channels you joined.
+
+<i>You don't need to set anything up — just send your join request and the bot handles the rest.</i>'''
+    if owner_username:
+        text += f"\n\n🆘 Need help with this bot or its channels? Contact @{owner_username}."
+    return text
 
 START_TEXT = '''Welcome To Channel Guru Bot! 🛐🫂!
 Just Make Me Admin In Your Channel 🫡 & I Will Accept All Your Channel Requests!
