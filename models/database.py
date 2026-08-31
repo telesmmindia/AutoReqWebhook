@@ -70,7 +70,8 @@ def channel_checker(channel_id):
         print(e)
         pass
 
-def channel_data_inserter(bot_id=0, channel_id=0, user_id=0, greet_msg=0, channel_name='', greet_msg_chat=0, btns=''):
+def channel_data_inserter(bot_id=0, channel_id=0, user_id=0, greet_msg=0, channel_name='', greet_msg_chat=0, btns='',
+                          greet_data=None):
     btns = str(btns)
     try:
         connection = get_connection()
@@ -86,10 +87,14 @@ def channel_data_inserter(bot_id=0, channel_id=0, user_id=0, greet_msg=0, channe
             cursor.execute(insert_into_dump_table)
             dump_query = f"delete from cm_channel_data where channel_id = {channel_id} and bot_id = 1111"
             cursor.execute(dump_query)
-        insert_query = (f'insert into cm_channel_data (bot_id, channel_id, user_id, greet_msg, channel_name, greet_msg_chat, btns) values ({bot_id}, {channel_id}, {user_id}, {greet_msg}, '
-                        f'"{channel_name}", {greet_msg_chat}, "{btns}")')
-        print(insert_query)
-        cursor.execute(insert_query)
+        # Parameterized: greet_data is JSON full of quotes and HTML tags, which
+        # would break the interpolated query this used to build (and so would a
+        # channel name containing a quote).
+        insert_query = ('insert into cm_channel_data (bot_id, channel_id, user_id, greet_msg, '
+                        'channel_name, greet_msg_chat, btns, greet_data) '
+                        'values (%s, %s, %s, %s, %s, %s, %s, %s)')
+        cursor.execute(insert_query, (bot_id, channel_id, user_id, greet_msg,
+                                      channel_name, greet_msg_chat, btns, greet_data))
         connection.commit()
 
     except Exception as e:
@@ -182,6 +187,39 @@ def udpate_message_state(user_id):
     except Exception as e:
         print(e)
         pass
+
+def set_greet_data(channel_id, payload):
+    """Stores (or clears, with payload=None) the JSON snapshot of a channel's
+    join greeting that keeps premium emoji -- see core/greetings.py.
+
+    Parameterized rather than going through editor(), because the payload is
+    JSON full of quotes and HTML tags that would break the query editor()
+    builds by interpolation."""
+    query = 'UPDATE cm_channel_data SET greet_data = %s WHERE channel_id = %s'
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query, (payload, channel_id))
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass
+
+
+def set_welcome_data(bot_id, payload):
+    """Same, for the bot's own /start welcome message on req_bots."""
+    query = 'UPDATE req_bots SET welcome_data = %s WHERE bot_id = %s'
+    try:
+        connection = get_connection()
+        p = connection.cursor()
+        p.execute(query, (payload, bot_id))
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(e)
+        pass
+
 
 def udpate_welcome(bot_id,mesage_id,btns):
     btns = str(btns)

@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
+from core.greetings import send_stored_message, snapshot_message
 from core.states import set_welcome
 from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
     GRT_SET_2_DEF, EDIT_OPTIONS, get_default_accepted_txt, CONFIRM_SET_GREETING_MESSAGE, \
@@ -12,7 +13,7 @@ from core.texts import CHOOSE, CANCELLED, SEND_NEW_WELCOME_MSG, \
 from keyboards.InlineKeyboard import get_keyboard, yesno, main_buttons, edit_btns, tutorial_link, promo_btn2, \
     owner_support_btn
 from keyboards.Replykeyboard import get_n_cancel
-from models.database import bot_fetcher, udpate_welcome, all_clients_count, check_premium
+from models.database import bot_fetcher, udpate_welcome, all_clients_count, check_premium, set_welcome_data
 
 
 class AdminFilter(BaseFilter):
@@ -99,7 +100,10 @@ async def start_user_handler(message:Message):
             raw_buttons.append(promo)
     buttons = InlineKeyboardMarkup(inline_keyboard=raw_buttons)
     try:
-        await message.bot.copy_message(message.from_user.id, details['user_id'], details['u_w_msg_id'], reply_markup=buttons)
+        # Snapshot-first so the owner's premium / animated emoji survive; falls
+        # back internally to copying their original message.
+        await send_stored_message(message.bot, message.from_user.id, details.get('welcome_data'),
+                                  details['user_id'], details['u_w_msg_id'], reply_markup=buttons)
     except:
         print(buttons)
         bot_details = await message.bot.get_me()
@@ -112,8 +116,11 @@ async def set_welcome_of_bot(message:Message,state:FSMContext):
     await state.set_state(set_welcome.change_post)
     await message.bot.send_message(text=DONT_KNOW_HOW_TO, chat_id=message.from_user.id, reply_markup=tutorial_link(BOT_WELCOME_DICT), disable_web_page_preview=True)
     try:
-        message_to_cum_on = await message.bot.copy_message(message.from_user.id,details['user_id'],details['u_w_msg_id'],
-                                                       reply_markup = None if details['btns'] == 'None' else InlineKeyboardBuilder(eval(details['btns'])).as_markup())
+        await send_stored_message(
+            message.bot, message.from_user.id, details.get('welcome_data'),
+            details['user_id'], details['u_w_msg_id'],
+            reply_markup=None if details['btns'] == 'None'
+            else InlineKeyboardBuilder(eval(details['btns'])).as_markup())
         await message.bot.send_message(chat_id=message.from_user.id, text=EDIT_OPTIONS, reply_markup=edit_btns(), disable_web_page_preview=True)
     except:
         is_premium = check_premium(details['user_id'])
@@ -135,7 +142,8 @@ async def get_welcome_msg(message: Message,state:FSMContext):
     if message.text:
         if 'cancel' not in message.text.lower() :
             await state.set_state(set_welcome.confirmation)
-            await state.update_data(message_id = message.message_id)
+            await state.update_data(message_id = message.message_id,
+                                    welcome_data = snapshot_message(message))
             if message.reply_markup:
                 await state.update_data(buttons = message.reply_markup.inline_keyboard)
             else:
@@ -152,20 +160,28 @@ async def get_welcome_msg(message: Message,state:FSMContext):
             await message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)
             await state.clear()
     else:
+        snapshot = snapshot_message(message)
         await state.set_state(set_welcome.confirmation)
-        await state.update_data(message_id=message.message_id)
+        await state.update_data(message_id=message.message_id, welcome_data=snapshot)
         if message.reply_markup:
             await state.update_data(buttons=message.reply_markup.inline_keyboard)
         else:
             await state.update_data(buttons=None)
-        testis = await message.send_copy(chat_id=message.from_user.id, reply_markup=message.reply_markup)
-        await testis.reply(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
+        # Echo it back the way users will receive it, premium emoji included.
+        testis = await send_stored_message(message.bot, message.from_user.id, snapshot,
+                                           message.chat.id, message.message_id,
+                                           reply_markup=message.reply_markup)
+        # copy_message (the no-snapshot fallback) hands back a MessageId, which
+        # can't be replied to -- reply to the owner's own message instead.
+        reply_target = testis if isinstance(testis, Message) else message
+        await reply_target.reply(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno())
 
 @router.callback_query(set_welcome.confirmation)
 async def confirm_welcome(callback:CallbackQuery,state:FSMContext):
     if callback.data == 'Yes':
         data = await state.get_data()
         udpate_welcome(callback.bot.id,data['message_id'],str(data['buttons']).replace('\'','"'))
+        set_welcome_data(callback.bot.id, data.get('welcome_data'))
         await callback.message.delete()
         await callback.message.answer(GREET_MESSAGE_UPDATED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         await callback.message.answer(CHOOSE, reply_markup=main_buttons(), disable_web_page_preview=True)

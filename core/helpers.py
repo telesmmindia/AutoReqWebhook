@@ -4,6 +4,7 @@ import traceback
 from aiogram.enums import ChatMemberStatus
 from colorama import Fore, Style
 
+from core.greetings import send_stored_message
 from core.texts import BROADCAST_SUMMARY
 from models.database import udpate_message_state
 
@@ -16,7 +17,14 @@ async def is_bot_admin(channel_id,bot):
         return False
 
 
-async def send_message_broad(clients=0, forward_from=0, message_id=0, btn=0, usr_count=0,bot=None):
+async def send_message_broad(clients=0, forward_from=0, message_id=0, btn=0, usr_count=0,bot=None,snapshot=None):
+        """Fans an owner's message out to their members.
+
+        `snapshot` is the JSON capture of that message (see core/greetings.py).
+        Sending from it keeps any premium/animated emoji, which a plain
+        copy_message of the owner's message would flatten to the fallback
+        emoji; send_stored_message falls back to copy_message without one.
+        """
         try:
             error_count = 0
             count = 0
@@ -27,8 +35,9 @@ async def send_message_broad(clients=0, forward_from=0, message_id=0, btn=0, usr
                             print(i)
                             # Add timeout for each task
                             await asyncio.wait_for(
-                                bot.copy_message(
-                                    i, forward_from, message_id, reply_markup=btn if btn != 0 else None
+                                send_stored_message(
+                                    bot, i, snapshot, forward_from, message_id,
+                                    reply_markup=btn if btn != 0 else None
                                 ),
                                 timeout=5  # Set timeout (e.g., 5 seconds)
                             )

@@ -10,6 +10,7 @@ from core.texts import TOTAL_USERS_MESSAGE, BROADCAST_USER_COUNT, BROADCAST_MESS
     CANCELLED, NOT_ENOUGH_PEOPLE, CONFIRM_RUN_MESSAGE, SENDING_MESSAGE_TO_USERS, FORWARD_YOUR_POST
 from keyboards.InlineKeyboard import get_keyboard, my_users_btn, yesno, channels_new, get_cancel
 from keyboards.Replykeyboard import get_n_cancel
+from core.greetings import send_stored_message, snapshot_message
 from core.helpers import  send_message_broad
 from core.states import my_users
 from models.database import get_channels, all_clients
@@ -104,9 +105,15 @@ async def edit_message(message: types.Message,state: FSMContext):
         await message.answer(TOTAL_USERS_MESSAGE.format(clients["count(*)"]), reply_markup=my_users_btn())
         await state.set_state(my_users.channels)
     else:
-        await state.update_data(message_id=message.message_id,forward_from=message.from_user.id,buttons= message.reply_markup)
+        snapshot = snapshot_message(message)
+        await state.update_data(message_id=message.message_id,forward_from=message.from_user.id,buttons= message.reply_markup,
+                                broadcast_data=snapshot)
         await state.set_state(my_users.channels_run_send_conf)
-        await message.bot.copy_message(message.from_user.id, message.from_user.id, message.message_id,reply_markup=message.reply_markup)
+        # Preview through the broadcast delivery path so premium emoji render
+        # here the same way recipients will see them.
+        await send_stored_message(message.bot, message.from_user.id, snapshot,
+                                  message.from_user.id, message.message_id,
+                                  reply_markup=message.reply_markup)
         await message.answer(CONFIRM_RUN_MESSAGE, reply_markup=yesno(), disable_web_page_preview=True)
 
 @router.callback_query(my_users.channels_run_send_conf)
@@ -117,7 +124,7 @@ async def edit_message(callback: types.CallbackQuery,state: FSMContext):
         if data['users'] != 'all':
             await callback.message.answer(SENDING_MESSAGE_TO_USERS,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
             await callback.message.answer(CHOOSE,reply_markup=get_keyboard(), disable_web_page_preview=True)
-            task = asyncio.create_task(send_message_broad(clients=data['users'], forward_from=data['forward_from'], message_id=data['message_id'], btn=data['buttons'], usr_count=data['users_count'],bot=callback.bot))
+            task = asyncio.create_task(send_message_broad(clients=data['users'], forward_from=data['forward_from'], message_id=data['message_id'], btn=data['buttons'], usr_count=data['users_count'],bot=callback.bot,snapshot=data.get('broadcast_data')))
 
         else:
             clients = all_clients(owner=callback.from_user.id, col= '*')
@@ -129,7 +136,8 @@ async def edit_message(callback: types.CallbackQuery,state: FSMContext):
                 await callback.message.answer(CHOOSE, reply_markup=get_keyboard(), disable_web_page_preview=True)
                 task = asyncio.create_task(send_message_broad(clients=clients_ids, forward_from=data['forward_from'],
                                                               message_id=data['message_id'], btn=data['buttons'],
-                                                              usr_count=data['users_count'],bot=callback.bot))
+                                                              usr_count=data['users_count'],bot=callback.bot,
+                                                              snapshot=data.get('broadcast_data')))
         await state.clear()
 
     elif callback.data == 'No':

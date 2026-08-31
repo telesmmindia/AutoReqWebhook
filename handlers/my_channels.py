@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 
+from core.greetings import send_stored_message, snapshot_message
 from core.helpers import send_message_broad
 from keyboards.InlineKeyboard import get_keyboard, edit_btns, get_cancel, yesno, channels_btns, \
     channels_new  # channels_new import this later when button is fixed
@@ -15,7 +16,7 @@ from core.texts import GRT_SET_2_DEF, YOUR_CHANNELS, CHOOSE, CHANNEL_DETAILS, GR
     NO_POST_CREATED, BROADCAST_USER_COUNT, CONFIRM_REMOVE_CHANNEL, CHANNEL_REMOVED_SUCCESS, UNKNOWN_CHOICE, \
     SEND_BROADCAST_MESSAGE, ENTER_NUMBER_ONLY, CONFIRM_RUN_MESSAGE, NO_USERS_MESSAGE, SENDING_MESSAGE_TO_USERS, \
     CANCELLED, SEND_NEW_POST, GREET_MESSAGE_STORED, CONFIRM_SET_GREETING_MESSAGE, GREET_MESSAGE_UPDATED
-from models.database import get_channels, all_clients, channel_remover, editor
+from models.database import get_channels, all_clients, channel_remover, editor, set_greet_data
 
 router = Router(name="my_channel")
 
@@ -46,13 +47,16 @@ async def channel_edit(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.delete()
         await state.set_state(MyChannels.btn_edit)
         if data['editing_channel'][0]['greet_msg'] != 0:
-            print((data['editing_channel'][0]['btns']).replace('\"', '\''))
             try:
-                await callback.bot.copy_message(callback.from_user.id, data['editing_channel'][0]['greet_msg_chat'],
-                                   data['editing_channel'][0]['greet_msg'],
-                                   reply_markup=None if data['editing_channel'][0][
-                                                            'btns'] == 'None' else InlineKeyboardBuilder(
-                                       eval(data['editing_channel'][0]['btns'])).as_markup())
+                # Previews through the join-request delivery path, so the
+                # premium emoji here are the real animated ones.
+                await send_stored_message(
+                    callback.bot, callback.from_user.id,
+                    data['editing_channel'][0].get('greet_data'),
+                    data['editing_channel'][0]['greet_msg_chat'],
+                    data['editing_channel'][0]['greet_msg'],
+                    reply_markup=None if data['editing_channel'][0]['btns'] == 'None'
+                    else InlineKeyboardBuilder(eval(data['editing_channel'][0]['btns'])).as_markup())
             except Exception as e:
                 bot_details = await callback.bot.get_me()
 
@@ -133,10 +137,12 @@ async def edit_message(message: types.Message, state: FSMContext):
         await state.set_state(MyChannels.edit)
     else:
         await state.set_state(MyChannels.run_promo)
+        snapshot = snapshot_message(message)
         await state.update_data(message_id=message.message_id, forward_from=message.from_user.id,
-                                buttons=message.reply_markup)
-        await message.bot.copy_message(message.from_user.id, message.from_user.id, message.message_id,
-                               reply_markup=message.reply_markup)
+                                buttons=message.reply_markup, broadcast_data=snapshot)
+        await send_stored_message(message.bot, message.from_user.id, snapshot,
+                                  message.from_user.id, message.message_id,
+                                  reply_markup=message.reply_markup)
         await message.answer(CONFIRM_RUN_MESSAGE, reply_markup=yesno(), disable_web_page_preview=True)
 
 
@@ -156,7 +162,8 @@ async def edit_message(calback: types.CallbackQuery, state: FSMContext):
             await state.clear()
             task = asyncio.create_task(send_message_broad(clients=clients_ids, forward_from=data['forward_from'],
                                                           message_id=data['message_id'], btn=data['buttons'],
-                                                          usr_count=data['users_count'],bot=calback.bot))
+                                                          usr_count=data['users_count'],bot=calback.bot,
+                                                          snapshot=data.get('broadcast_data')))
         await state.clear()
 
 
@@ -199,9 +206,12 @@ async def edit_message(message: types.Message, state: FSMContext):
         else:
             await state.update_data(buttons=None)
 
+        snapshot = snapshot_message(message)
         await state.update_data(message_id=message.message_id,
-                                message_chat=message.from_user.id)
-        await message.bot.copy_message(message.chat.id, message.chat.id, message.message_id, reply_markup=message.reply_markup)
+                                message_chat=message.from_user.id, greet_data=snapshot)
+        await send_stored_message(message.bot, message.chat.id, snapshot,
+                                  message.chat.id, message.message_id,
+                                  reply_markup=message.reply_markup)
         await message.answer(CONFIRM_SET_GREETING_MESSAGE, reply_markup=yesno(), disable_web_page_preview=True)
 
 
@@ -214,6 +224,7 @@ async def edit_message(callback: types.CallbackQuery, state: FSMContext):
                data['editing_channel'][0]['channel_id'])
         editor('cm_channel_data', 'btns', str(data['buttons']).replace('\'', '"'),
                data['editing_channel'][0]['channel_id'])
+        set_greet_data(data['editing_channel'][0]['channel_id'], data.get('greet_data'))
         await callback.message.delete()
         await callback.message.answer(GREET_MESSAGE_UPDATED,reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         details = get_channels(callback.from_user.id, data['editing_channel'][0]['channel_id'])

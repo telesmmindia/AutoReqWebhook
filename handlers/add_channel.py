@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 
 from keyboards.InlineKeyboard import get_keyboard, yesno, get_cancel, defaultn
+from core.greetings import send_stored_message, snapshot_message
 from core.helpers import is_bot_admin
 from core.states import AddChannel
 from core.texts import WHT_IS_GRT_MSG, BOT_NOT_ADMIN, CHNL_ALRDY_ADDED, FRWD_POST_FRM_CHNL_ONLY, GRT_SET_2_DEF, \
@@ -70,10 +71,15 @@ async def channel_greet_get(message: types.Message,state:FSMContext):
         await message.answer(CHOOSE, reply_markup=get_keyboard(), disable_web_page_preview=True)
 
     else:
+        greet_data = snapshot_message(message)
         await state.update_data(greet_message_id = message.message_id,
-                                greet_message_chat_id = message.chat.id,greet_buttons =  None if message.reply_markup is None else message.reply_markup.inline_keyboard)
+                                greet_message_chat_id = message.chat.id,greet_data = greet_data,greet_buttons =  None if message.reply_markup is None else message.reply_markup.inline_keyboard)
         await state.set_state(AddChannel.btn_check)
-        await message.bot.copy_message(message.chat.id, message.chat.id, message.message_id,reply_markup=message.reply_markup)
+        # Preview through the same path joiners will get, so the owner sees
+        # exactly how their premium emoji will come out.
+        await send_stored_message(message.bot, message.chat.id, greet_data,
+                                  message.chat.id, message.message_id,
+                                  reply_markup=message.reply_markup)
         await message.answer(CONFIRM_SET_MESSAGE, reply_markup=yesno(), disable_web_page_preview=True)
 
 @router.callback_query(AddChannel.btn_check)
@@ -81,7 +87,7 @@ async def channel_btn_get(callback: types.CallbackQuery,state:FSMContext):
     await callback.answer('choose')
     if callback.data == 'Yes':
         data = await state.get_data()
-        channel_data_inserter(bot_id=callback.bot.id,channel_id=data['channel_id'], user_id=callback.from_user.id, greet_msg=data['greet_message_id'],channel_name=data['channel_name'],greet_msg_chat=data['greet_message_chat_id'],btns=data['greet_buttons'])
+        channel_data_inserter(bot_id=callback.bot.id,channel_id=data['channel_id'], user_id=callback.from_user.id, greet_msg=data['greet_message_id'],channel_name=data['channel_name'],greet_msg_chat=data['greet_message_chat_id'],btns=data['greet_buttons'],greet_data=data.get('greet_data'))
         await callback.message.reply(CHANNEL_INSERTED, reply_markup=ReplyKeyboardRemove(), disable_web_page_preview=True)
         await callback.message.reply(CHOOSE, reply_markup=get_keyboard(), disable_web_page_preview=True)
         await callback.message.delete()
