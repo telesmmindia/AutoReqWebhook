@@ -93,12 +93,13 @@ async def back_to_ad(callback:CallbackQuery,state:FSMContext):
 @router.message(UserFilter())
 async def start_user_handler(message:Message):
     details = bot_fetcher(message.bot.token)
-    raw_buttons = eval(details['btns'])
+    # Bots whose owner never added welcome buttons store btns as the string 'None'.
+    raw_buttons = eval(details['btns'] or 'None') or []
     if str(details['bot_id']) != '8130984037':
         promo = promo_btn2(details['user_id'])
         if promo:
             raw_buttons.append(promo)
-    buttons = InlineKeyboardMarkup(inline_keyboard=raw_buttons)
+    buttons = InlineKeyboardMarkup(inline_keyboard=raw_buttons) if raw_buttons else None
     try:
         # Snapshot-first so the owner's premium / animated emoji survive; falls
         # back internally to copying their original message.
